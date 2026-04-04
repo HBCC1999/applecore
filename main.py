@@ -20,7 +20,7 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
-GAME_VERSION = "AppleCore v1.3.5"
+GAME_VERSION = "AppleCore v1.3.4"
 snake = 30
 scr = []
 today_date = datetime.date.today()
@@ -36,12 +36,12 @@ myimg = pygame.image.load(resource_path('assets/images.png'))
 myimg = pygame.transform.scale(myimg, (900, 600)).convert_alpha()
 go = pygame.image.load(resource_path('assets/g_over.png'))
 go = pygame.transform.scale(go, (900, 600)).convert_alpha()
-bk = pygame.image.load(resource_path('assets/back.png'))
+bk = pygame.image.load(resource_path('assets/back.jpg'))
 bk = pygame.transform.scale(bk, (900, 600)).convert_alpha()
 apl = pygame.image.load(resource_path('assets/app.png'))
 apl = pygame.transform.scale(apl, (snake, snake)).convert_alpha()
-# s_i = pygame.image.load(resource_path('assets/sicon.png'))
-# si = pygame.transform.scale(s_i, (43, 43)).convert_alpha()
+s_i = pygame.image.load(resource_path('assets/sicon.png'))
+si = pygame.transform.scale(s_i, (43, 43)).convert_alpha()
 setting_page = pygame.image.load(resource_path('assets/settingpage.png'))
 setting_page = pygame.transform.scale(setting_page, (900, 600)).convert_alpha()
 
@@ -170,11 +170,11 @@ def hpage():
     while not quit_game:
         game_window.fill((220, 200, 240))
         game_window.blit(myimg, (0, 0))
-        # game_window.blit(si, (817, 56))
-        # stext('Pyth0n wants to eat some apples...'.title(), yellow, 200, 150)
-        # stext("Hello "+user_name+"!".title(), blue, 510, 50, b=True)
-        # stext('Help him out!!!'.title(), yellow, 300, 260)
-        # stext('press the space bar to play :)', yellow, 250, 400, True)\
+        game_window.blit(si, (817, 56))
+        stext('Pyth0n wants to eat some apples...'.title(), yellow, 200, 150)
+        stext("Hello "+user_name+"!".title(), blue, 510, 50, b=True)
+        stext('Help him out!!!'.title(), yellow, 300, 260)
+        stext('press the space bar to play :)', yellow, 250, 400, True)
         stext(f'version: {GAME_VERSION[GAME_VERSION.index("v")+1:]}', yellow, 350, 500)
 
         for event in pygame.event.get():
@@ -200,7 +200,7 @@ def hpage():
                         pygame.mixer.music.load("assets/b.mp3")
                         pygame.mixer.music.play()
                     gameloop()
-        # stext('Pyth0n wants to eat some apples...'.title(), blue, 200, 150)
+        stext('Pyth0n wants to eat some apples...'.title(), blue, 200, 150)
         pygame.display.update()
         clock.tick(30)
 
@@ -260,15 +260,15 @@ def gameloop():
             show_green_apple = random.choice([False, False, False, False, True])
             game_window.fill(white)
             game_window.blit(go, (0, 0))
-            stext('           PRESS ENTER TO CONTINUE',
-                  red, 900/2-300, 600/2+125)
-            stext(f'Highscore: {h_score}                                 Highest Appocity: {h_appocity}', blue, 50, 7)
-            stext('Made By Hashir Ahmad', blue, 300, 500+20)
+            stext('Game over! PRESS ENTER TO CONTINUE',
+                  red, 900/2-300, 600/2+100)
+            stext(f'Highscore: {h_score}            Highest Appocity: {h_appocity}', blue, 150, 100)
+            stext('Made By Hashir Ahmad', blue, 300, 500)
             scr.append(score)
             stext(f'your score is : {score}, achieved in {time_taken_to_score} seconds'.capitalize()
-            ,yellow, 900/2-300+30, 600/2+100+30+20)
+            ,yellow, 900/2-300+30, 600/2+100+30)
             stext(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if appocity == 1 else "apples"}/second'.capitalize()
-            ,yellow, 900/2-300+40, 600/2+100+60+20)
+            ,yellow, 900/2-300+40, 600/2+100+60)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
