@@ -29,7 +29,8 @@ mute_music = False
 
 # display
 game_window = pygame.display.set_mode((900, 600))
-icon = pygame.image.load(resource_path('assets/Icon.png'))
+icon = pygame.image.load(resource_path('assets/appicon.png'))
+icon = pygame.transform.scale(icon, (32, 32)).convert_alpha()
 pygame.display.set_icon(icon)
 pygame.display.set_caption(GAME_VERSION)
 myimg = pygame.image.load(resource_path('assets/images.png'))
