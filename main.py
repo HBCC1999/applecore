@@ -57,7 +57,14 @@ time1 = 0
 time_taken_to_score = 0
 
 # user name
-user_name = open(resource_path("assets/user_info.txt")).read()[2:8]
+if os.path.exists("assets/user_info.txt"):
+    with open(resource_path("assets/user_info.txt")) as f:
+        user_name = f.read()[2:8]
+else:
+    with open(resource_path("assets/user_info.txt"),"w") as f:
+        f.write("")
+        user_name = None
+# user_name = open(resource_path("assets/user_info.txt")).read()[2:8]
 
 text_input = ""
 
@@ -217,7 +224,7 @@ def gameloop():
     fps = 48
     if not os.path.exists(resource_path('assets/highscores.txt')):
         with open(resource_path('assets/highscores.txt'), 'w') as f:
-            f.write('0')
+            f.write('0\n0')
     with open(resource_path('assets/highscores.txt'), 'r') as f:
         list_of_highscore_and_appocity = f.read().split("\n")
         h_score = list_of_highscore_and_appocity[0]
@@ -248,9 +255,15 @@ def gameloop():
     while not quit_game:
         if game_over:
             appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
+            # Checking if the current appocity is greater than the highest appocity and updating it if necessary
             if appocity is not None and (appocity) > float(h_appocity):
                 h_appocity = str(appocity)
                 list_of_highscore_and_appocity[1] = str(appocity)
+            
+            # Checking if the current score is greater than the highscore and updating it if necessary
+            if score > int(h_score):
+                h_score = str(score)
+                list_of_highscore_and_appocity[0] = str(score)
 
             with open(resource_path('assets/highscores.txt'), 'w') as f:
                 # f.write(str(h_score)+f.read()[0:f.read().index("\n")])
@@ -362,8 +375,6 @@ def gameloop():
             if abs(snake_x-food_x) < collrate and abs(snake_y-food_y) < collrate:
                 score += 10
                 # print(s_lst)
-                if score > int(h_score):
-                    h_score = score
                 food_x = random.randint(40, 600)
                 food_y = random.randint(40, 400)
                 s_length += s_controler
