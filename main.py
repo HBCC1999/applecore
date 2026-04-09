@@ -1,3 +1,4 @@
+# using pygame-ce instead of pygame because pygame-ce is more up to date and has more features than pygame
 import pygame
 import random
 import os
