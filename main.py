@@ -5,6 +5,8 @@ import os
 import sys
 import time
 import datetime
+import psutil
+import winreg
 
 pygame.init()
 
@@ -46,6 +48,8 @@ apl = pygame.transform.scale(apl, (snake, snake)).convert_alpha()
 # si = pygame.transform.scale(s_i, (43, 43)).convert_alpha()
 setting_page = pygame.image.load(resource_path('assets/settingpage.png'))
 setting_page = pygame.transform.scale(setting_page, (900, 600)).convert_alpha()
+refresh_rate = pygame.display.get_current_refresh_rate()
+# print(f"refresh rate: {refresh_rate}")
 
 # colors
 blue = (0, 0, 255)
@@ -248,7 +252,7 @@ def gameloop():
     snake_y = random.randint(200,400)
     velocity_x = 0
     velocity_y = 0
-    init_velocity = 8
+    init_velocity = 8 * fps
     pause_game = False
     s_lst = []
     s_length = 1
@@ -256,6 +260,9 @@ def gameloop():
     time_paused = 0
     show_green_apple = random.choice([False, False, False, False, True])
     while not quit_game:
+        dt = clock.tick(fps) / 1000.0  # seconds since last frame
+        # print(dt)
+        print(snake_x, snake_y)
         if game_over:
             appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
             # Checking if the current appocity is greater than the highest appocity and updating it if necessary
@@ -375,8 +382,8 @@ def gameloop():
                         init_velocity = 9
             if (velocity_x != 0 or velocity_y !=0) and time1 is None:
                 time1 = time.time()
-            snake_x += velocity_x
-            snake_y += velocity_y
+            snake_x += round(velocity_x * dt)
+            snake_y += round(velocity_y * dt)
             if abs(snake_x-food_x) < collrate and abs(snake_y-food_y) < collrate:
                 score += 10
                 # print(s_lst)
@@ -392,10 +399,9 @@ def gameloop():
 
             ctime = time.localtime()
             ctime = time.strftime("%H-%M-%S")
-
             head = []
-            head.append(snake_x)
-            head.append(snake_y)
+            head.append(int(snake_x))
+            head.append(int(snake_y))
             s_lst.append(head)
 
             if len(s_lst) > s_length:
@@ -414,7 +420,7 @@ def gameloop():
 
             game_window.blit(apl, (food_x, food_y))
             
-            if not is_independence_day:
+            if is_independence_day:
                 # 20% chance for the green apple to appear(only on 14 August)
                 if show_green_apple:
                     pygame.draw.rect(game_window, (0, 130, 0),
@@ -443,7 +449,7 @@ def gameloop():
 
         pygame.display.update()
 
-        clock.tick(fps)
+        # clock.tick(fps)
 
     pygame.quit()
     quit()
