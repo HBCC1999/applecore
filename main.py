@@ -342,6 +342,9 @@ def gameloop():
                             pygame.mixer.music.pause()
                         else:
                             pygame.mixer.music.unpause()
+                    if event.key == pygame.K_F3:
+                        global Dynamic_FPS
+                        Dynamic_FPS = not Dynamic_FPS
                     if (event.key == pygame.K_RIGHT or event.key == pygame.K_d) and velocity_x == 0:
                         velocity_x = init_velocity
                         velocity_y = 0
@@ -473,8 +476,8 @@ def gameloop():
                 else:
                     fps = 20
                 time_before_game_loop = time.time()
-                print(fps, cpu_unused , optimization_index)
-                print(f"Battery unused: {battery_unused}%, CPU unused: {cpu_unused}%, VRAM unused: {vram_unused}%, Optimization index: {optimization_index},fps:{fps}")
+                # print(fps, cpu_unused , optimization_index)
+                # print(f"Battery unused: {battery_unused}%, CPU unused: {cpu_unused}%, VRAM unused: {vram_unused}%, Optimization index: {optimization_index},fps:{fps}")
             if fps < target_fps:
                 fps += 1
             elif fps > target_fps:
