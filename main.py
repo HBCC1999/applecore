@@ -112,7 +112,7 @@ def independendence_day_page():
                 quit_game = True
                 if not mute_music:
                     pygame.mixer.music.load("assets/b.mp3")
-                    pygame.mixer.music.play()
+                    pygame.mixer.music.play(-1)
                 return quit_game
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
@@ -131,7 +131,7 @@ def Pause_Window():
                 quit_game = True
                 if not mute_music:
                     pygame.mixer.music.load("assets/b.mp3")
-                    pygame.mixer.music.play()
+                    pygame.mixer.music.play(-1)
                 return quit_game
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -173,7 +173,7 @@ def stp():
 def hpage():
     if not mute_music:
         pygame.mixer.music.load("assets/c.mp3")
-        pygame.mixer.music.play()
+        pygame.mixer.music.play(-1)
     quit_game = False
     while not quit_game:
         game_window.fill((220, 200, 240))
@@ -188,6 +188,8 @@ def hpage():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game = True
+                pygame.quit()
+                quit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     print(event.pos)
@@ -200,13 +202,13 @@ def hpage():
                         stp()
                         if not mute_music:
                             pygame.mixer.music.load("assets/c.mp3")
-                            pygame.mixer.music.play()
+                            pygame.mixer.music.play(-1)
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
                     if not mute_music:
                         pygame.mixer.music.load("assets/b.mp3")
-                        pygame.mixer.music.play()
+                        pygame.mixer.music.play(-1)
                     gameloop()
         # stext('Pyth0n wants to eat some apples...'.title(), blue, 200, 150)
         pygame.display.update()
@@ -289,16 +291,18 @@ def gameloop():
                     quit_game = True
 
                 elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_F1:
+                        mute_music = not mute_music
+                        if mute_music:
+                            pygame.mixer.music.pause()
+                        else:
+                            pygame.mixer.music.stop()
+                            pygame.mixer.music.load("assets/a.mp3")
+                            pygame.mixer.music.play(-1)
                     if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE or event.key == pygame.K_o:
-                        if event.key == pygame.K_F1:
-                            mute_music = not mute_music
-                            if mute_music:
-                                pygame.mixer.music.pause()
-                            else:
-                                pygame.mixer.music.unpause()
                         if not mute_music:
                             pygame.mixer.music.load("assets/b.mp3")
-                            pygame.mixer.music.play()
+                            pygame.mixer.music.play(-1)
                         scr.clear()
                         gameloop()
                     elif event.key == pygame.K_HOME:
@@ -351,7 +355,7 @@ def gameloop():
                             time_taken_to_score = 0
                         if not mute_music:
                             pygame.mixer.music.load("assets/a.mp3")
-                            pygame.mixer.music.play()
+                            pygame.mixer.music.play(-1)
                     elif event.key == pygame.K_x:
                         s_controler += 3
                     elif event.key == pygame.K_z:
@@ -405,7 +409,7 @@ def gameloop():
 
                 if not mute_music:
                     pygame.mixer.music.load("assets/a.mp3")
-                    pygame.mixer.music.play()
+                    pygame.mixer.music.play(-1)
 
             game_window.blit(apl, (food_x, food_y))
             
@@ -430,7 +434,7 @@ def gameloop():
 
                 if not mute_music:
                     pygame.mixer.music.load("assets/a.mp3")
-                    pygame.mixer.music.play()
+                    pygame.mixer.music.play(-1)
 
                 # pygame.mixer.music.play() if not mute_music else None
 
