@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import datetime
+import psutil as p
 
 pygame.init()
 
@@ -21,12 +22,16 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
-GAME_VERSION = "AppleCore v1.3.5"
+GAME_VERSION = "AppleCore v1.3.6"
+Dynamic_FPS = True #This is a variable that determines whether the game should adjust its FPS based on the optimization index or not, if set to False the game will run at a constant FPS regardless of the optimization index
 snake = 30
 scr = []
 today_date = datetime.date.today()
 is_independence_day = (today_date.month == 8 and today_date.day == 14)
 mute_music = False
+target_fps = 48
+optimization_constant = 2.8 #This is a constant that is based of to calculate optimization index in gameloop its value is based of 70/25, where 25 is optimization index
+# that implies that the system is optimized enough to run the game at 70% of display refresh rate and this is the highest in the middle tier fps
 
 # display
 game_window = pygame.display.set_mode((900, 600))
@@ -46,6 +51,12 @@ apl = pygame.transform.scale(apl, (snake, snake)).convert_alpha()
 # si = pygame.transform.scale(s_i, (43, 43)).convert_alpha()
 setting_page = pygame.image.load(resource_path('assets/settingpage.png'))
 setting_page = pygame.transform.scale(setting_page, (900, 600)).convert_alpha()
+display_refresh_rate = pygame.display.get_current_refresh_rate()
+p.cpu_percent(interval=None); time.sleep(0.3)
+cpu_unused = 100 - p.cpu_percent(interval=None)
+battery_unused = p.sensors_battery().percent
+vram_unused = 100 - p.virtual_memory().percent
+optimization_index = ((battery_unused*0.7)*(cpu_unused*0.2)*(vram_unused*0.1))/100
 
 # colors
 blue = (0, 0, 255)
@@ -218,6 +229,8 @@ def hpage():
 # game loop
 def gameloop():
     global mute_music
+    global optimization_index
+    global target_fps
 
     ctime = time.localtime()
     ctime = time.strftime("%H-%M-%S")
@@ -225,6 +238,9 @@ def gameloop():
 
     collrate = 12
     fps = 48
+    if fps > display_refresh_rate:
+        fps = display_refresh_rate
+
     if not os.path.exists(resource_path('assets/highscores.txt')):
         with open(resource_path('assets/highscores.txt'), 'w') as f:
             f.write('0\n0')
@@ -255,8 +271,10 @@ def gameloop():
     s_controler = 3
     time_paused = 0
     show_green_apple = random.choice([False, False, False, False, True])
+    time_before_game_loop = time.time()
     while not quit_game:
         if game_over:
+            fps = 30
             appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
             # Checking if the current appocity is greater than the highest appocity and updating it if necessary
             if appocity is not None and (appocity) > float(h_appocity):
@@ -436,13 +454,37 @@ def gameloop():
                 if not mute_music:
                     pygame.mixer.music.load("assets/a.mp3")
                     pygame.mixer.music.play(-1)
-
-                # pygame.mixer.music.play() if not mute_music else None
+            if time.time()-time_before_game_loop >= 3 and not pause_game and Dynamic_FPS:
+                cpu_unused = 100 - p.cpu_percent(interval=None)
+                battery_unused = p.sensors_battery().percent
+                vram_unused = 100 - p.virtual_memory().percent
+                # New quantity that measures the overall optimization of the system for gaming, calculated using the battery, cpu and vram unused percentages
+                optimization_index = ((battery_unused*0.7)*(cpu_unused*0.2)*(vram_unused*0.1))/100
+                # print(optimization_index, battery_unused, cpu_unused, vram_unused)
+                if battery_unused == 0 or p.sensors_battery().power_plugged:
+                    fps = display_refresh_rate
+                elif optimization_index >= 25:
+                    fps = display_refresh_rate
+                elif optimization_index != 0 and optimization_index < 25 and optimization_index >= 12:
+                    if display_refresh_rate >= 60:
+                        target_fps = (round(optimization_index, -1)* optimization_constant)/100 * display_refresh_rate
+                    elif display_refresh_rate <= 48:
+                        target_fps = (round(optimization_index, -1)* optimization_constant)/100 * display_refresh_rate
+                else:
+                    fps = 20
+                time_before_game_loop = time.time()
+                print(fps, cpu_unused , optimization_index)
+                print(f"Battery unused: {battery_unused}%, CPU unused: {cpu_unused}%, VRAM unused: {vram_unused}%, Optimization index: {optimization_index},fps:{fps}")
+            if fps < target_fps:
+                fps += 1
+            elif fps > target_fps:
+                fps -= 1
+            else:
+                fps = target_fps
 
             plot_snake(game_window, blue, s_lst, snake)
 
         pygame.display.update()
-
         clock.tick(fps)
 
     pygame.quit()
