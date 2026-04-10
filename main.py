@@ -464,17 +464,21 @@ def gameloop():
                 # New quantity that measures the overall optimization of the system for gaming, calculated using the battery, cpu and vram unused percentages
                 optimization_index = ((battery_unused*0.7)*(cpu_unused*0.2)*(vram_unused*0.1))/100
                 # print(optimization_index, battery_unused, cpu_unused, vram_unused)
-                if battery_unused == 0 or p.sensors_battery().power_plugged:
-                    fps = display_refresh_rate
+                if battery_unused == 100 or p.sensors_battery().power_plugged:
+                    # fps = display_refresh_rate
+                    target_fps = display_refresh_rate
                 elif optimization_index >= 25:
-                    fps = display_refresh_rate
+                    # fps = display_refresh_rate
+                    target_fps = display_refresh_rate
                 elif optimization_index != 0 and optimization_index < 25 and optimization_index >= 12:
                     if display_refresh_rate >= 60:
                         target_fps = (round(optimization_index, -1)* optimization_constant)/100 * display_refresh_rate
-                    elif display_refresh_rate <= 48:
+                    elif display_refresh_rate < 60:
                         target_fps = (round(optimization_index, -1)* optimization_constant)/100 * display_refresh_rate
+                        target_fps = 20 if target_fps < 20 else target_fps
                 else:
-                    fps = 20
+                    # fps = 20
+                    target_fps = 20
                 time_before_game_loop = time.time()
                 # print(fps, cpu_unused , optimization_index)
                 # print(f"Battery unused: {battery_unused}%, CPU unused: {cpu_unused}%, VRAM unused: {vram_unused}%, Optimization index: {optimization_index},fps:{fps}")
@@ -484,6 +488,7 @@ def gameloop():
                 fps -= 1
             else:
                 fps = target_fps
+            print(fps, optimization_index)
 
             plot_snake(game_window, blue, s_lst, snake)
 
