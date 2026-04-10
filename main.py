@@ -252,7 +252,7 @@ def gameloop():
     snake_y = random.randint(200,400)
     velocity_x = 0
     velocity_y = 0
-    init_velocity = 8 * (fps/10)
+    init_velocity = 8 * (fps)
     pause_game = False
     s_lst = []
     s_length = 1
@@ -260,7 +260,7 @@ def gameloop():
     time_paused = 0
     show_green_apple = random.choice([False, False, False, False, True])
     while not quit_game:
-        dt = clock.tick(fps) / 100.0  # seconds since last frame
+        dt = clock.tick(fps) / 1000  # seconds since last frame
         # print(dt)
         # print(snake_x, snake_y)
         if game_over:
@@ -382,8 +382,10 @@ def gameloop():
                         init_velocity = 9
             if (velocity_x != 0 or velocity_y !=0) and time1 is None:
                 time1 = time.time()
-            snake_x += round(velocity_x * dt)
-            snake_y += round(velocity_y * dt)
+            snake_x_f = (velocity_x * dt)
+            snake_x += int(snake_x_f)
+            snake_y_f = (velocity_y * dt)
+            snake_y += int(snake_y_f)
             if abs(snake_x-food_x) < collrate and abs(snake_y-food_y) < collrate:
                 score += 10
                 # print(s_lst)
