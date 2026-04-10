@@ -274,6 +274,7 @@ def gameloop():
     time_paused = 0
     show_green_apple = random.choice([False, False, False, False, True])
     time_before_game_loop = time.time()
+    init_velocity_change = 0
     while not quit_game:
         if game_over:
             fps = 30
@@ -367,12 +368,12 @@ def gameloop():
                         elif random.choice([1,2,3,4,5,6,7,8,9,10]) == 5:
                             score+=20
                     elif event.key == pygame.K_v:
-                        init_velocity += 2
+                        init_velocity_change += 2
                     elif event.key == pygame.K_c:
                         if init_velocity != 0 or init_velocity != 1:
-                            init_velocity -= 2
+                            init_velocity_change -= 2
                         else:
-                            init_velocity = 0
+                            init_velocity_change = 0
                     elif event.key == pygame.K_o:
                         game_over = True
                         if time1 is not None:
@@ -465,7 +466,6 @@ def gameloop():
             if time.time()-time_before_game_loop >= 3 and not pause_game and Dynamic_FPS:
                 cpu_unused = 100 - p.cpu_percent(interval=None)
                 battery_unused = p.sensors_battery().percent
-                battery_unused = 31
                 vram_unused = 100 - p.virtual_memory().percent
                 # New quantity that measures the overall optimization of the system for gaming, calculated using the battery, cpu and vram unused percentages
                 optimization_index = ((battery_unused*0.7)*(cpu_unused*0.2)*(vram_unused*0.1))/100
@@ -473,19 +473,21 @@ def gameloop():
                 if battery_unused == 100 or p.sensors_battery().power_plugged:
                     # fps = display_refresh_rate
                     target_fps = display_refresh_rate
-                elif optimization_index >= 25:
+                if optimization_index >= 25:
                     # fps = display_refresh_rate
                     target_fps = display_refresh_rate
-                elif optimization_index != 0 and optimization_index < 25 and optimization_index >= 12:
+                elif (optimization_index != 0 and optimization_index < 25 and optimization_index >= 12) and battery_unused<30:
                     if display_refresh_rate >= 60:
                         target_fps = (round(optimization_index)* optimization_constant)/100 * display_refresh_rate
                     elif display_refresh_rate < 60:
                         target_fps = (round(optimization_index)* optimization_constant)/100 * display_refresh_rate
+                elif (optimization_index != 0 and optimization_index < 25 and optimization_index >= 12) and battery_unused>=25:
+                    target_fps = 48
                 else:
                     # fps = 20
                     target_fps = 20
                 target_fps = 20 if target_fps < 20 else target_fps
-                target_fps = round(target_fps)
+                target_fps = int(target_fps)
                 print(optimization_index, target_fps)
                 time_before_game_loop = time.time()
                 # print(fps, cpu_unused , optimization_index)
@@ -496,6 +498,16 @@ def gameloop():
                 fps -= 1
             else:
                 fps = target_fps
+            if target_fps >= 48 and target_fps <= 60 and init_velocity != 7:
+                init_velocity = 7
+                print("12")
+            elif target_fps <48 and target_fps >= 30 and init_velocity != 12:
+                init_velocity = 12
+            elif target_fps < 30 and init_velocity != 16:
+                init_velocity = 16
+            print(fps, target_fps)
+
+            init_velocity += init_velocity_change
 
             plot_snake(game_window, blue, s_lst, snake)
 
