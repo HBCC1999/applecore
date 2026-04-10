@@ -252,7 +252,7 @@ def gameloop():
     snake_y = random.randint(200,400)
     velocity_x = 0
     velocity_y = 0
-    init_velocity = 8 * fps
+    init_velocity = 8 * (fps/10)
     pause_game = False
     s_lst = []
     s_length = 1
@@ -260,9 +260,9 @@ def gameloop():
     time_paused = 0
     show_green_apple = random.choice([False, False, False, False, True])
     while not quit_game:
-        dt = clock.tick(fps) / 1000.0  # seconds since last frame
+        dt = clock.tick(fps) / 100.0  # seconds since last frame
         # print(dt)
-        print(snake_x, snake_y)
+        # print(snake_x, snake_y)
         if game_over:
             appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
             # Checking if the current appocity is greater than the highest appocity and updating it if necessary
@@ -390,6 +390,7 @@ def gameloop():
                 food_x = random.randint(40, 600)
                 food_y = random.randint(40, 400)
                 s_length += s_controler
+                
             game_window.fill(white)
             game_window.blit(bk, (0, 0))
 
