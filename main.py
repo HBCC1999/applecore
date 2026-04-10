@@ -154,7 +154,7 @@ def Pause_Window():
         pygame.display.update()
     clock.tick(30)
 
-def stp():
+def settingpage():
     allowuinput = False
     quit_game = False
     while not quit_game:
@@ -182,7 +182,7 @@ def stp():
         pygame.display.update()
     clock.tick(30)
 
-def hpage():
+def menuscreen():
     if not mute_music:
         pygame.mixer.music.load("assets/c.mp3")
         pygame.mixer.music.play(-1)
@@ -211,7 +211,7 @@ def hpage():
                         if not mute_music:
                             pygame.mixer.music.load("assets/settingsound.mp3")
                             pygame.mixer.music.play()
-                        stp()
+                        settingpage()
                         if not mute_music:
                             pygame.mixer.music.load("assets/c.mp3")
                             pygame.mixer.music.play(-1)
@@ -232,8 +232,10 @@ def gameloop():
     global optimization_index
     global target_fps
 
-    ctime = time.localtime()
-    ctime = time.strftime("%H-%M-%S")
+    # ctime = time.localtime()
+    # ctime = time.strftime("%H-%M-%S")
+    # starting_time_for_timer = time.time()
+    # timer = f"{}:{}:{time.time()-starting_time_for_timer}"
     time1 = None
 
     collrate = 12
@@ -264,7 +266,7 @@ def gameloop():
     snake_y = random.randint(200,400)
     velocity_x = 0
     velocity_y = 0
-    init_velocity = 8
+    init_velocity = 7
     pause_game = False
     s_lst = []
     s_length = 1
@@ -326,7 +328,7 @@ def gameloop():
                         gameloop()
                     elif event.key == pygame.K_HOME:
                         scr.clear()
-                        hpage()
+                        menuscreen()
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -345,6 +347,8 @@ def gameloop():
                     if event.key == pygame.K_F3:
                         global Dynamic_FPS
                         Dynamic_FPS = not Dynamic_FPS
+                        if not Dynamic_FPS:
+                            target_fps = 48 if display_refresh_rate >= 48 else display_refresh_rate
                     if (event.key == pygame.K_RIGHT or event.key == pygame.K_d) and velocity_x == 0:
                         velocity_x = init_velocity
                         velocity_y = 0
@@ -409,10 +413,11 @@ def gameloop():
 
             stext('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 30)
             if not pause_game:
-                stext(ctime, green, 12+400, 30)
+                # stext(ctime, green, 12+400, 30)
+                pass
 
-            ctime = time.localtime()
-            ctime = time.strftime("%H-%M-%S")
+            # ctime = time.localtime()
+            # ctime = time.strftime("%H-%M-%S")
 
             head = []
             head.append(snake_x)
@@ -460,6 +465,7 @@ def gameloop():
             if time.time()-time_before_game_loop >= 3 and not pause_game and Dynamic_FPS:
                 cpu_unused = 100 - p.cpu_percent(interval=None)
                 battery_unused = p.sensors_battery().percent
+                battery_unused = 31
                 vram_unused = 100 - p.virtual_memory().percent
                 # New quantity that measures the overall optimization of the system for gaming, calculated using the battery, cpu and vram unused percentages
                 optimization_index = ((battery_unused*0.7)*(cpu_unused*0.2)*(vram_unused*0.1))/100
@@ -472,13 +478,15 @@ def gameloop():
                     target_fps = display_refresh_rate
                 elif optimization_index != 0 and optimization_index < 25 and optimization_index >= 12:
                     if display_refresh_rate >= 60:
-                        target_fps = (round(optimization_index, -1)* optimization_constant)/100 * display_refresh_rate
+                        target_fps = (round(optimization_index)* optimization_constant)/100 * display_refresh_rate
                     elif display_refresh_rate < 60:
-                        target_fps = (round(optimization_index, -1)* optimization_constant)/100 * display_refresh_rate
-                        target_fps = 20 if target_fps < 20 else target_fps
+                        target_fps = (round(optimization_index)* optimization_constant)/100 * display_refresh_rate
                 else:
                     # fps = 20
                     target_fps = 20
+                target_fps = 20 if target_fps < 20 else target_fps
+                target_fps = round(target_fps)
+                print(optimization_index, target_fps)
                 time_before_game_loop = time.time()
                 # print(fps, cpu_unused , optimization_index)
                 # print(f"Battery unused: {battery_unused}%, CPU unused: {cpu_unused}%, VRAM unused: {vram_unused}%, Optimization index: {optimization_index},fps:{fps}")
@@ -488,7 +496,6 @@ def gameloop():
                 fps -= 1
             else:
                 fps = target_fps
-            print(fps, optimization_index)
 
             plot_snake(game_window, blue, s_lst, snake)
 
@@ -499,4 +506,4 @@ def gameloop():
     quit()
 
 if __name__ == '__main__':
-    hpage()
+    menuscreen()
