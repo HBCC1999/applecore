@@ -23,7 +23,6 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 GAME_VERSION = "AppleCore v1.3.6"
-Dynamic_FPS = True #This is a variable that determines whether the game should adjust its FPS based on the optimization index or not, if set to False the game will run at a constant FPS regardless of the optimization index
 snake = 30
 scr = []
 today_date = datetime.date.today()
@@ -77,6 +76,21 @@ else:
         f.write("")
         user_name = None
 # user_name = open(resource_path("assets/user_info.txt")).read()[2:8]
+
+gamefilecontent = ""
+if os.path.exists(resource_path('assets/highscores.txt')):
+    with open(resource_path('assets/highscores.txt'), 'r') as f:
+        gamefilecontent = f.read()
+first_line_of_file = gamefilecontent.split("\n")[0] if gamefilecontent else ""
+should_reset_gamefilecontent = False if first_line_of_file.isdigit() else True
+if should_reset_gamefilecontent:
+    with open(resource_path('assets/highscores.txt'), 'w') as f:
+        f.write("0\n0\nFalse")
+
+with open(resource_path('assets/highscores.txt'), 'r') as f:
+    in_game_info = f.read().split("\n")
+#This is a variable that determines whether the game should adjust its FPS based on the optimization index or not, if set to False the game will run at a constant FPS regardless of the optimization index
+Dynamic_FPS = (in_game_info[2] == "True")
 
 text_input = ""
 
@@ -231,6 +245,8 @@ def gameloop():
     global mute_music
     global optimization_index
     global target_fps
+    global in_game_info
+    global Dynamic_FPS
 
     # ctime = time.localtime()
     # ctime = time.strftime("%H-%M-%S")
@@ -243,13 +259,8 @@ def gameloop():
     if fps > display_refresh_rate:
         fps = display_refresh_rate
 
-    if not os.path.exists(resource_path('assets/highscores.txt')):
-        with open(resource_path('assets/highscores.txt'), 'w') as f:
-            f.write('0\n0')
-    with open(resource_path('assets/highscores.txt'), 'r') as f:
-        list_of_highscore_and_appocity = f.read().split("\n")
-        h_score = list_of_highscore_and_appocity[0]
-        h_appocity = list_of_highscore_and_appocity[1]
+    h_score = in_game_info[0]
+    h_appocity = in_game_info[1]
 
     appocity = "0 apple/second"
     quit_game = False
@@ -282,16 +293,19 @@ def gameloop():
             # Checking if the current appocity is greater than the highest appocity and updating it if necessary
             if appocity is not None and (appocity) > float(h_appocity):
                 h_appocity = str(appocity)
-                list_of_highscore_and_appocity[1] = str(appocity)
+                in_game_info[1] = str(appocity)
             
             # Checking if the current score is greater than the highscore and updating it if necessary
             if score > int(h_score):
                 h_score = str(score)
-                list_of_highscore_and_appocity[0] = str(score)
+                in_game_info[0] = str(score)
+            
+            if in_game_info[2] != str(Dynamic_FPS):
+                in_game_info[2] = str(Dynamic_FPS)
 
             with open(resource_path('assets/highscores.txt'), 'w') as f:
                 # f.write(str(h_score)+f.read()[0:f.read().index("\n")])
-                f.write("\n".join(list_of_highscore_and_appocity))
+                f.write("\n".join(in_game_info))
             # with open(resource_path("assets/highscores.txt")) as i:
             #     h_appocity = int(i.read()[i.read().index("\n")+1:])
             # print(h_appocity)
@@ -346,7 +360,6 @@ def gameloop():
                         else:
                             pygame.mixer.music.unpause()
                     if event.key == pygame.K_F3:
-                        global Dynamic_FPS
                         Dynamic_FPS = not Dynamic_FPS
                         if not Dynamic_FPS:
                             target_fps = 48 if display_refresh_rate >= 48 else display_refresh_rate
@@ -412,10 +425,9 @@ def gameloop():
             game_window.fill(white)
             game_window.blit(bk, (0, 0))
 
-            stext('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 30)
+            stext('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10)
             if not pause_game:
-                # stext(ctime, green, 12+400, 30)
-                pass
+                stext(str(fps), (yellow if Dynamic_FPS else green), 12+850, 7)
 
             # ctime = time.localtime()
             # ctime = time.strftime("%H-%M-%S")
@@ -440,8 +452,8 @@ def gameloop():
                     pygame.mixer.music.play(-1)
 
             game_window.blit(apl, (food_x, food_y))
-            
-            if not is_independence_day:
+
+            if is_independence_day:
                 # 20% chance for the green apple to appear(only on 14 August)
                 if show_green_apple:
                     pygame.draw.rect(game_window, (0, 130, 0),
@@ -490,7 +502,6 @@ def gameloop():
                 target_fps = int(target_fps)
                 print(optimization_index, target_fps)
                 time_before_game_loop = time.time()
-                # print(fps, cpu_unused , optimization_index)
                 # print(f"Battery unused: {battery_unused}%, CPU unused: {cpu_unused}%, VRAM unused: {vram_unused}%, Optimization index: {optimization_index},fps:{fps}")
             if fps < target_fps:
                 fps += 1
@@ -505,7 +516,7 @@ def gameloop():
                 init_velocity = 12
             elif target_fps < 30 and init_velocity != 16:
                 init_velocity = 16
-            print(fps, target_fps)
+            # print(fps, target_fps)
 
             init_velocity += init_velocity_change
 
