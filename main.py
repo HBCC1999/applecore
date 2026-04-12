@@ -1,3 +1,10 @@
+"""Applecore v1.3.6
+Developed by HBCC1999
+Textures: Some are made by the author and some are AI-generated.
+Audio: From Youtube Studio
+First developed: August, 2024
+----------------------------------------------------------------
+"""
 # using pygame-ce instead of pygame because pygame-ce is more up to date and has more features than pygame
 import pygame
 import random
@@ -22,7 +29,8 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
-GAME_VERSION = "AppleCore v1.3.6"
+GAME_VERSION = __doc__.split("\n")[0]
+print(__doc__, end="")
 snake = 30
 scr = []
 today_date = datetime.date.today()
@@ -81,14 +89,21 @@ gamefilecontent = ""
 if os.path.exists(resource_path('assets/highscores.txt')):
     with open(resource_path('assets/highscores.txt'), 'r') as f:
         gamefilecontent = f.read()
+in_game_info = gamefilecontent.split("\n")
+
 first_line_of_file = gamefilecontent.split("\n")[0] if gamefilecontent else ""
-should_reset_gamefilecontent = False if first_line_of_file.isdigit() else True
+
+should_reset_gamefilecontent = (
+    not first_line_of_file.isdigit() or
+    not in_game_info[1].replace('.', '', 1).isdigit() or
+    in_game_info[2] not in ('True', 'False')
+)
+
 if should_reset_gamefilecontent:
     with open(resource_path('assets/highscores.txt'), 'w') as f:
         f.write("0\n0\nFalse")
+    in_game_info = ["0", "0", "False"]
 
-with open(resource_path('assets/highscores.txt'), 'r') as f:
-    in_game_info = f.read().split("\n")
 #This is a variable that determines whether the game should adjust its FPS based on the optimization index or not, if set to False the game will run at a constant FPS regardless of the optimization index
 Dynamic_FPS = (in_game_info[2] == "True")
 
@@ -113,7 +128,7 @@ def usertext(event):
 
 # font
 # printing text on game
-def stext(text, color, x, y, b=False):
+def load_text(text, color, x, y, b=False):
     """
     Shows Text on Screen
     """
@@ -174,7 +189,7 @@ def settingpage():
     while not quit_game:
         game_window.fill((220, 200, 240))
         game_window.blit(setting_page, (0, 0))
-        stext("  "+user_name, blue, 245, 95)
+        load_text("  "+user_name, blue, 245, 95)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game = True
@@ -205,11 +220,11 @@ def menuscreen():
         game_window.fill((220, 200, 240))
         game_window.blit(myimg, (0, 0))
         # game_window.blit(si, (817, 56))
-        # stext('Pyth0n wants to eat some apples...'.title(), yellow, 200, 150)
-        # stext("Hello "+user_name+"!".title(), blue, 510, 50, b=True)
-        # stext('Help him out!!!'.title(), yellow, 300, 260)
-        # stext('press the space bar to play :)', yellow, 250, 400, True)\
-        stext(f'version: {GAME_VERSION[GAME_VERSION.index("v")+1:]}', yellow, 350, 500)
+        # load_text('Pyth0n wants to eat some apples...'.title(), yellow, 200, 150)
+        # load_text("Hello "+user_name+"!".title(), blue, 510, 50, b=True)
+        # load_text('Help him out!!!'.title(), yellow, 300, 260)
+        # load_text('press the space bar to play :)', yellow, 250, 400, True)\
+        load_text(f'version: {GAME_VERSION[GAME_VERSION.index("v")+1:]}', yellow, 350, 500)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -236,7 +251,7 @@ def menuscreen():
                         pygame.mixer.music.load("assets/b.mp3")
                         pygame.mixer.music.play(-1)
                     gameloop()
-        # stext('Pyth0n wants to eat some apples...'.title(), blue, 200, 150)
+        # load_text('Pyth0n wants to eat some apples...'.title(), blue, 200, 150)
         pygame.display.update()
         clock.tick(30)
 
@@ -247,6 +262,7 @@ def gameloop():
     global target_fps
     global in_game_info
     global Dynamic_FPS
+    global time_taken_to_score
 
     # ctime = time.localtime()
     # ctime = time.strftime("%H-%M-%S")
@@ -312,14 +328,14 @@ def gameloop():
             show_green_apple = random.choice([False, False, False, False, True])
             game_window.fill(white)
             game_window.blit(go, (0, 0))
-            stext('           PRESS ENTER TO CONTINUE',
+            load_text('           PRESS ENTER TO CONTINUE',
                   red, 900/2-300, 600/2+125)
-            stext(f'Highscore: {h_score}                                 Highest Appocity: {h_appocity}', blue, 50, 7)
-            stext('Made By Hashir Ahmad', blue, 300, 500+20)
+            load_text(f'Highscore: {h_score}                                 Highest Appocity: {h_appocity}', blue, 50, 7)
+            load_text('Made By Hashir Ahmad', blue, 300, 500+20)
             scr.append(score)
-            stext(f'your score is : {score}, achieved in {time_taken_to_score} seconds'.capitalize()
+            load_text(f'your score is : {score}, achieved in {time_taken_to_score} seconds'.capitalize()
             ,yellow, 900/2-300+30, 600/2+100+30+20)
-            stext(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if appocity == 1 else "apples"}/second'.capitalize()
+            load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if appocity == 1 else "apples"}/second'.capitalize()
             ,yellow, 900/2-300+40, 600/2+100+60+20)
 
             for event in pygame.event.get():
@@ -347,8 +363,26 @@ def gameloop():
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    quit_game = True
+                    time_taken_to_score = round(time.time() - time1, 2) - time_paused
+                    appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
+                    # Checking if the current appocity is greater than the highest appocity and updating it if necessary
+                    if appocity is not None and (appocity) > float(h_appocity):
+                        h_appocity = str(appocity)
+                        in_game_info[1] = str(appocity)
+                    print(time_taken_to_score, appocity, h_appocity)
+                    
+                    # Checking if the current score is greater than the highscore and updating it if necessary
+                    if score > int(h_score):
+                        h_score = str(score)
+                        in_game_info[0] = str(score)
+                    
+                    if in_game_info[2] != str(Dynamic_FPS):
+                        in_game_info[2] = str(Dynamic_FPS)
 
+                    with open(resource_path('assets/highscores.txt'), 'w') as f:
+                        # f.write(str(h_score)+f.read()[0:f.read().index("\n")])
+                        f.write("\n".join(in_game_info))
+                    quit_game = True
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         pause_game = True
@@ -425,9 +459,9 @@ def gameloop():
             game_window.fill(white)
             game_window.blit(bk, (0, 0))
 
-            stext('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10)
+            load_text('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10)
             if not pause_game:
-                stext(str(fps), (yellow if Dynamic_FPS else green), 12+850, 7)
+                load_text(str(fps), (yellow if Dynamic_FPS else green), 12+850, 7)
 
             # ctime = time.localtime()
             # ctime = time.strftime("%H-%M-%S")
