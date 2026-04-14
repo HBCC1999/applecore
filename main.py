@@ -96,6 +96,7 @@ first_line_of_file = gamefilecontent.split("\n")[0] if gamefilecontent else ""
 should_reset_gamefilecontent = (
     not first_line_of_file.isdigit() or
     not in_game_info[1].replace('.', '', 1).isdigit() or
+    not len(in_game_info)>3 or
     in_game_info[2] not in ('True', 'False')
 )
 
@@ -363,7 +364,7 @@ def gameloop():
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    time_taken_to_score = round(time.time() - time1, 2) - time_paused
+                    time_taken_to_score = (round(time.time() - time1, 2) - time_paused) if time1 is not None else 0
                     appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
                     # Checking if the current appocity is greater than the highest appocity and updating it if necessary
                     if appocity is not None and (appocity) > float(h_appocity):
