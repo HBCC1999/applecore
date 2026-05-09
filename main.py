@@ -1,4 +1,4 @@
-"""Applecore v1.3.6
+"""Applecore (Standard) v1.3.6
 Developed by HBCC1999
 Textures: Some are made by the author and some are AI-generated.
 Audio: From Youtube Studio
@@ -105,7 +105,8 @@ if should_reset_gamefilecontent:
         f.write("0\n0\nFalse")
     in_game_info = ["0", "0", "False"]
 
-#This is a variable that determines whether the game should adjust its FPS based on the optimization index or not, if set to False the game will run at a constant FPS regardless of the optimization index
+# This is a variable that determines whether the game should adjust its FPS based on the optimization index or not,
+# if set to False the game will run at a constant FPS regardless of the optimization index
 Dynamic_FPS = (in_game_info[2] == "True")
 
 text_input = ""
@@ -252,6 +253,7 @@ def menuscreen():
                         pygame.mixer.music.load(resource_path("assets/b.mp3"))
                         pygame.mixer.music.play(-1)
                     gameloop()
+
         # load_text('Pyth0n wants to eat some apples...'.title(), blue, 200, 150)
         pygame.display.update()
         clock.tick(30)
@@ -323,6 +325,7 @@ def gameloop():
             with open(resource_path('assets/highscores.txt'), 'w') as f:
                 # f.write(str(h_score)+f.read()[0:f.read().index("\n")])
                 f.write("\n".join(in_game_info))
+
             # with open(resource_path("assets/highscores.txt")) as i:
             #     h_appocity = int(i.read()[i.read().index("\n")+1:])
             # print(h_appocity)
@@ -361,6 +364,7 @@ def gameloop():
                     elif event.key == pygame.K_HOME:
                         scr.clear()
                         menuscreen()
+
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -383,6 +387,7 @@ def gameloop():
                     with open(resource_path('assets/highscores.txt'), 'w') as f:
                         # f.write(str(h_score)+f.read()[0:f.read().index("\n")])
                         f.write("\n".join(in_game_info))
+
                     quit_game = True
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
@@ -447,6 +452,7 @@ def gameloop():
                         collrate = 4
                         s_controler = 6
                         init_velocity = 9
+
             if (velocity_x != 0 or velocity_y !=0) and time1 is None:
                 time1 = time.time()
             snake_x += velocity_x
@@ -510,6 +516,7 @@ def gameloop():
                 if not mute_music:
                     pygame.mixer.music.load(resource_path("assets/a.mp3"))
                     pygame.mixer.music.play(-1)
+
             if time.time()-time_before_game_loop >= 3 and not pause_game and Dynamic_FPS:
                 cpu_unused = 100 - p.cpu_percent(interval=None)
                 # Checking if the battery sensor is available and getting the battery unused percentage, if not available setting it to 100% unused
@@ -518,6 +525,7 @@ def gameloop():
                 # New quantity that measures the overall optimization of the system for gaming, calculated using the battery, cpu and vram unused percentages
                 optimization_index = ((battery_unused*0.7)*(cpu_unused*0.2)*(vram_unused*0.1))/100
                 # print(optimization_index, battery_unused, cpu_unused, vram_unused)
+
                 if battery_unused == 100 or p.sensors_battery().power_plugged:
                     # fps = display_refresh_rate
                     target_fps = display_refresh_rate
@@ -534,17 +542,20 @@ def gameloop():
                 else:
                     # fps = 20
                     target_fps = 20
+
                 target_fps = 20 if target_fps < 20 else target_fps
                 target_fps = int(target_fps)
                 print(optimization_index, target_fps)
                 time_before_game_loop = time.time()
                 print(f"Battery unused: {battery_unused}%, CPU unused: {cpu_unused}%, VRAM unused: {vram_unused}%, Optimization index: {optimization_index},fps:{fps}")
+                
             if fps < target_fps:
                 fps += 1
             elif fps > target_fps:
                 fps -= 1
             else:
                 fps = target_fps
+
             if target_fps >= 48 and target_fps <= 60 and init_velocity != 7:
                 init_velocity = 7
                 print("12")
@@ -564,5 +575,9 @@ def gameloop():
     pygame.quit()
     sys.exit()
 
-if __name__ == '__main__':
+def main():
+    """Main Function, where the whole game comes up together!"""
     menuscreen()
+
+if __name__ == '__main__':
+    main()
