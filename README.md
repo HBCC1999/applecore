@@ -44,26 +44,33 @@ Applecore 2.0 was subsequently released within a week of 1.0
 Applecore 3.0 added some cool features, fixed previous bugs, and added new keybinds.
 Current update 3.6 was launched in April.
 
+# Built With
+- Python 3.11 — Programming Language
+- pygame-ce — Main library that powers the game
+- psutil — Fetches system resource data for optimization index which alters the FPS accordingly aka Dynamic FPS (v3.6+)
+- auto-py-to-exe — Compiles source code into .exe via PyInstaller
+- Git — Version tracking
+
 # Setup/Installation
 Download the latest .exe from the releases page (link below), place it anywhere on your computer, and double-click to launch.
 
 # Security Guarantee
 The file is 100% safe to run. It doesnt contain any malicious software. This executable is self-contained and does not connect to the internet or collect any data.
 
+# Download
+Download the latest .exe from the Applecore-Releases Repository:
+[Applecore-Releases](https://github.com/HBCC1999/applecore-releases)
+
 # QNA
 Have any questions or issues with running the game, head to the discussions tab to ask questions or give suggestions for the future of the game.
 
 # License
 © 2024–2026 HBCC1999. All rights reserved.
-This software is provided for personal use only. 
-Redistribution or reverse engineering is not permitted.
+Source code is made public for review and transparency purposes only.
+Redistribution, repackaging, or reverse engineering is not permitted.
 
 # Credits
 Developed by HBCC1999. Some of the game textures are made by the developer, while some are AI-generated. However the code is written completely by the developer.
-
-# Download
-Download the latest .exe from the Applecore-Releases Repository
-(https://github.com/HBCC1999/applecore-releases)
 
 # Screenshots
 <img width="1418" height="752" alt="images" src="https://github.com/user-attachments/assets/8dc87b94-38ef-4d12-9dfd-6f770079a8ad" />
