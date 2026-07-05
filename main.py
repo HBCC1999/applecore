@@ -2,7 +2,6 @@
 Developed by HBCC1999
 Textures: Some are made by the author and some are AI-generated.
 Audio: From Youtube Studio
-First developed: August, 2024
 ----------------------------------------------------------------
 """
 # using pygame-ce instead of pygame because pygame-ce is more up to date and has more features than pygame
@@ -85,6 +84,8 @@ else:
         user_name = None
 # user_name = open(resource_path("assets/user_info.txt")).read()[2:8]
 
+# Better in-game-info management, now the game will check if the in-game-info
+# file is corrupted or not and if it is corrupted then it will reset the file to default values
 gamefilecontent = ""
 if os.path.exists(resource_path('assets/highscores.txt')):
     with open(resource_path('assets/highscores.txt'), 'r') as f:
@@ -113,6 +114,9 @@ text_input = ""
 
 # snake appearing function
 def plot_snake(game_window, color, s_lst, snake):
+    """Plots the snake on the game window,
+    s_lst is a list of tuples containing the coordinates of the snake's body segments, 
+    and snake is the size of each segment. Visually, the snake is represented as a series of squares drawn on the game window."""
     for x, y in s_lst:
         pygame.draw.rect(game_window, color, pygame.Rect(x, y,snake,snake), 20)
 
@@ -120,6 +124,9 @@ clock = pygame.time.Clock()
 
 # controlling user input (text)
 def usertext(event):
+    """Accepting keyboard input from user and storing in variable.
+    This feature is not fully implemented yet,
+    stay tuned for the future updates!"""
     if event.key == pygame.K_BACKSPACE:
         if text_input:
             text_input=text_input[:-1]
@@ -132,7 +139,7 @@ def usertext(event):
 # printing text on game
 def load_text(text, color, x, y, b=False):
     """
-    Shows Text on Screen
+    Shows Text on Window, b is for bold text, if b is True then the text will be bold, if b is False then the text will be normal.
     """
     if not b:
         font = pygame.font.SysFont(None, 40, italic=True)
@@ -144,6 +151,7 @@ def load_text(text, color, x, y, b=False):
         game_window.blit(txt, (x, y))
 
 def independendence_day_page():
+    """An easter egg to celibrate Pakistan's Independence day on 14th August. (any year)"""
     pygame.event.clear()
     start_time = time.time()
     quit_game = False
@@ -166,6 +174,11 @@ def independendence_day_page():
     clock.tick(30)
 
 def Pause_Window():
+    """Pauses the game after esc key is pressed, in this state, snake attributes 
+    can't be changed and time spent in this state is not accounted for in time_taken_to_score.
+    Game remains paused until esc is pressed again or game is quit.
+    Many other keybinds like O key, f3 or f1, pretty much everything is not functional in this state
+    so as to provide legitimate gameplay. Also the FPS indicator is not shown in this state."""
     quit_game = False
     s_time = time.time()
     while not quit_game:
@@ -186,6 +199,7 @@ def Pause_Window():
     clock.tick(30)
 
 def settingpage():
+    """Settings page, coming soon!"""
     allowuinput = False
     quit_game = False
     while not quit_game:
@@ -214,6 +228,7 @@ def settingpage():
     clock.tick(30)
 
 def menuscreen():
+    """Main menu screen, where the game starts and user can access settings or start the game."""
     if not mute_music:
         pygame.mixer.music.load(resource_path("assets/c.mp3"))
         pygame.mixer.music.play(-1)
@@ -258,8 +273,11 @@ def menuscreen():
         pygame.display.update()
         clock.tick(30)
 
-# game loop
+# Main game loop / In-game loop
 def gameloop():
+    """Main game loop, where the actual gameplay happens. This function includes
+    the main-game and game-over screen, as well as the logic for the snake's movement, 
+    collision detection, scoring, and FPS optimization based on system performance."""
     global mute_music
     global optimization_index
     global target_fps
@@ -287,6 +305,7 @@ def gameloop():
 
     score = 0
 
+    # entity - related variables and constants
     food_x = random.randint(40, 800)
     food_y = random.randint(50, 500)
     green_food_x= random.randint(20,900)
