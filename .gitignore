@@ -11,3 +11,6 @@ assets/highscores.txt
 assets/user_info.txt
 notes.applecore.txt
 output/
+dist/
+build/
+*.spec
