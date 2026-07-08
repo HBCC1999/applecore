@@ -1,4 +1,4 @@
-"""Applecore (Standard) v1.3.6
+"""Applecore (Standard) v3.6
 Developed by HBCC1999
 Textures: Some are made by the author and some are AI-generated.
 Audio: From Youtube Studio
@@ -60,7 +60,7 @@ setting_page = pygame.transform.scale(setting_page, (900, 600)).convert_alpha()
 display_refresh_rate = pygame.display.get_current_refresh_rate()
 p.cpu_percent(interval=None); time.sleep(0.3)
 cpu_unused = 100 - p.cpu_percent(interval=None)
-battery_unused = p.sensors_battery().percent
+battery_unused = 100 if p.sensors_battery() is None else p.sensors_battery().percent
 vram_unused = 100 - p.virtual_memory().percent
 optimization_index = ((battery_unused*0.7)*(cpu_unused*0.2)*(vram_unused*0.1))/100
 
@@ -75,13 +75,13 @@ time1 = 0
 time_taken_to_score = 0
 
 # user name
-if os.path.exists("assets/user_info.txt"):
+if os.path.exists(resource_path("assets/user_info.txt")):
     with open(resource_path("assets/user_info.txt")) as f:
         user_name = f.read()[2:8]
 else:
     with open(resource_path("assets/user_info.txt"),"w") as f:
         f.write("")
-        user_name = None
+        user_name = 'player'
 # user_name = open(resource_path("assets/user_info.txt")).read()[2:8]
 
 # Better in-game-info management, now the game will check if the in-game-info
@@ -255,7 +255,7 @@ def menuscreen():
                     if m_p[0] > 817 and m_p[0] < 845 and m_p[1] > 56 and m_p[1] < 90:
                         print('successful')
                         if not mute_music:
-                            pygame.mixer.music.load("assets/settingsound.mp3")
+                            pygame.mixer.music.load(resource_path("assets/settingsound.mp3"))
                             pygame.mixer.music.play()
                         settingpage()
                         if not mute_music:
@@ -539,7 +539,7 @@ def gameloop():
             if time.time()-time_before_game_loop >= 3 and not pause_game and Dynamic_FPS:
                 cpu_unused = 100 - p.cpu_percent(interval=None)
                 # Checking if the battery sensor is available and getting the battery unused percentage, if not available setting it to 100% unused
-                battery_unused = p.sensors_battery().percent if p.sensors_battery() is not None else 100
+                battery_unused = 100 if p.sensors_battery() is None else p.sensors_battery().percent
                 vram_unused = 100 - p.virtual_memory().percent
                 # New quantity that measures the overall optimization of the system for gaming, calculated using the battery, cpu and vram unused percentages
                 optimization_index = ((battery_unused*0.7)*(cpu_unused*0.2)*(vram_unused*0.1))/100
