@@ -9,3 +9,7 @@ back 2.jpg
 AppleCore v1.3.5/
 assets/highscores.txt
 assets/user_info.txt
+build/
+dist/
+output/
+notes.applecore.txt
