@@ -13,3 +13,4 @@ build/
 dist/
 output/
 notes.applecore.txt
+*.spec
