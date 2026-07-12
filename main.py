@@ -561,8 +561,8 @@ def gameloop():
             if time.time()-time_before_game_loop >= 3 and Dynamic_FPS:
                 cpu_unused = 100 - p.cpu_percent(interval=None)
                 # Checking if the battery sensor is available and getting the battery unused percentage, if not available setting it to 100% unused
-                # battery_unused = 100 if p.sensors_battery() is None else p.sensors_battery().percent
-                battery_unused = random.randint(1, 50)
+                battery_unused = 100 if p.sensors_battery() is None else p.sensors_battery().percent
+                # battery_unused = random.randint(1, 50)
                 vram_unused = 100 - p.virtual_memory().percent
                 # New quantity that measures the overall optimization of the system for gaming, calculated using the battery, cpu and vram unused percentages
                 optimization_index = ((battery_unused*0.7)*(cpu_unused*0.2)*(vram_unused*0.1))/100
