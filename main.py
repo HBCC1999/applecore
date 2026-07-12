@@ -1,4 +1,4 @@
-"""Applecore (Standard) v3.6
+"""Applecore (Standard) v3.7-alpha.1
 Developed by HBCC1999
 Textures: Some are made by the author and some are AI-generated.
 Audio: From Youtube Studio
@@ -31,16 +31,18 @@ def resource_path(relative_path):
 GAME_VERSION = __doc__.split("\n")[0]
 print(__doc__, end="")
 snake = 30
+DEFAULT_FPS = 60
 scr = []
 today_date = datetime.date.today()
 is_independence_day = (today_date.month == 8 and today_date.day == 14)
 mute_music = False
-target_fps = 48
+target_fps = DEFAULT_FPS
 optimization_constant = 2.8 #This is a constant that is based of to calculate optimization index in gameloop its value is based of 70/25, where 25 is optimization index
 # that implies that the system is optimized enough to run the game at 70% of display refresh rate and this is the highest in the middle tier fps
 
 # display
 game_window = pygame.display.set_mode((900, 600))
+BASE_VELOCITY = 384 # (8 * fps:=48) pixels per second, regardless of the frames
 icon = pygame.image.load(resource_path('assets/appicon.png'))
 icon = pygame.transform.scale(icon, (32, 32)).convert_alpha()
 pygame.display.set_icon(icon)
@@ -185,6 +187,7 @@ def Pause_Window():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game = True
+                sys.exit()
                 if not mute_music:
                     pygame.mixer.music.load(resource_path("assets/b.mp3"))
                     pygame.mixer.music.play(-1)
@@ -196,7 +199,7 @@ def Pause_Window():
                     time_paused = time.time() - s_time
                     return time_paused
         pygame.display.update()
-    clock.tick(30)
+        clock.tick(30)
 
 def settingpage():
     """Settings page, coming soon!"""
@@ -242,7 +245,7 @@ def menuscreen():
         # load_text("Hello "+user_name+"!".title(), blue, 510, 50, b=True)
         # load_text('Help him out!!!'.title(), yellow, 300, 260)
         # load_text('press the space bar to play :)', yellow, 250, 400, True)\
-        load_text(f'version: {GAME_VERSION[GAME_VERSION.index("v")+1:]}', yellow, 350, 500)
+        load_text(f'version: {GAME_VERSION[GAME_VERSION.index("v"):]}', yellow, 320, 500)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -293,9 +296,8 @@ def gameloop():
     time1 = None
 
     collrate = 12
-    fps = 48
-    if fps > display_refresh_rate:
-        fps = display_refresh_rate
+    trailing_buffer = 5
+    fps = DEFAULT_FPS
 
     h_score = in_game_info[0]
     h_appocity = in_game_info[1]
@@ -316,7 +318,7 @@ def gameloop():
     snake_y = random.randint(200,400)
     velocity_x = 0
     velocity_y = 0
-    init_velocity = 7
+    init_velocity = BASE_VELOCITY
     pause_game = False
     s_lst = []
     s_length = 1
@@ -326,6 +328,8 @@ def gameloop():
     time_before_game_loop = time.time()
     init_velocity_change = 0
     while not quit_game:
+        dt = clock.tick(fps) / 1000.0  # Amount of seconds between each loop/frame and seconds because i follow SI units.
+        dt = min(dt, 0.05) # Cap it at 50ms. So no stutters and wierd teleportation after toggling pause_menu
         if game_over:
             fps = 30
             appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
@@ -422,7 +426,7 @@ def gameloop():
                     if event.key == pygame.K_F3:
                         Dynamic_FPS = not Dynamic_FPS
                         if not Dynamic_FPS:
-                            target_fps = 48 if display_refresh_rate >= 48 else display_refresh_rate
+                            target_fps = DEFAULT_FPS if display_refresh_rate >= DEFAULT_FPS else display_refresh_rate
                     if (event.key == pygame.K_RIGHT or event.key == pygame.K_d) and velocity_x == 0:
                         velocity_x = init_velocity
                         velocity_y = 0
@@ -441,10 +445,10 @@ def gameloop():
                         elif random.choice([1,2,3,4,5,6,7,8,9,10]) == 5:
                             score+=20
                     elif event.key == pygame.K_v:
-                        init_velocity_change += 2
+                        init_velocity_change += 48
                     elif event.key == pygame.K_c:
                         if init_velocity != 0 or init_velocity != 1:
-                            init_velocity_change -= 2
+                            init_velocity_change -= 48
                         else:
                             init_velocity_change = 0
                     elif event.key == pygame.K_o:
@@ -475,8 +479,13 @@ def gameloop():
 
             if (velocity_x != 0 or velocity_y !=0) and time1 is None:
                 time1 = time.time()
-            snake_x += velocity_x
-            snake_y += velocity_y
+
+            velocity_x_f = (velocity_x * dt)
+            velocity_y_f = (velocity_y * dt)
+
+            snake_x += (velocity_x_f)
+            snake_y += (velocity_y_f)
+
             if abs(snake_x-food_x) < collrate and abs(snake_y-food_y) < collrate:
                 score += 10
                 # print(s_lst)
@@ -487,21 +496,33 @@ def gameloop():
             game_window.blit(bk, (0, 0))
 
             load_text('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10)
-            if not pause_game:
-                load_text(str(fps), (yellow if Dynamic_FPS else green), 12+850, 7)
+            # FPS indicator, green means constant frames and yellow means dynamic fps
+            load_text(str(fps), (yellow if Dynamic_FPS else green), 12+850, 7)
 
             # ctime = time.localtime()
             # ctime = time.strftime("%H-%M-%S")
 
             head = []
-            head.append(snake_x)
-            head.append(snake_y)
+            head.append(int(snake_x))
+            head.append(int(snake_y))
             s_lst.append(head)
 
             if len(s_lst) > s_length:
                 del s_lst[0]
+            
+            # New version of self-collision check to comply with the new snake motion system
+            # deadly_apple:
+            #     self_collision = any(
+            #         abs(head[0]-segment_x) < collrate and abs(head[1]-segment_y) < collrate
+            #         for segment_x, segment_y in s_lst[:len(s_lst)-1]
+            #     )
+   
+            self_collision = any(
+                abs(head[0]-segment_x) < collrate and abs(head[1]-segment_y) < collrate
+                for segment_x, segment_y in s_lst[:-1-trailing_buffer]
+            )
 
-            if head in s_lst[:len(s_lst)-1]:
+            if self_collision:
                 game_over = True
                 if time1 is not None:
                     time_taken_to_score = round(time.time() - time1, 2)
@@ -537,10 +558,11 @@ def gameloop():
                     pygame.mixer.music.load(resource_path("assets/a.mp3"))
                     pygame.mixer.music.play(-1)
 
-            if time.time()-time_before_game_loop >= 3 and not pause_game and Dynamic_FPS:
+            if time.time()-time_before_game_loop >= 3 and Dynamic_FPS:
                 cpu_unused = 100 - p.cpu_percent(interval=None)
                 # Checking if the battery sensor is available and getting the battery unused percentage, if not available setting it to 100% unused
-                battery_unused = 100 if p.sensors_battery() is None else p.sensors_battery().percent
+                # battery_unused = 100 if p.sensors_battery() is None else p.sensors_battery().percent
+                battery_unused = random.randint(1, 50)
                 vram_unused = 100 - p.virtual_memory().percent
                 # New quantity that measures the overall optimization of the system for gaming, calculated using the battery, cpu and vram unused percentages
                 optimization_index = ((battery_unused*0.7)*(cpu_unused*0.2)*(vram_unused*0.1))/100
@@ -558,14 +580,14 @@ def gameloop():
                     elif display_refresh_rate < 60:
                         target_fps = (round(optimization_index)* optimization_constant)/100 * display_refresh_rate
                 elif (optimization_index != 0 and optimization_index < 25 and optimization_index >= 12) and battery_unused>=25:
-                    target_fps = 48
+                    target_fps = 48 # mid-tear fps
                 else:
                     # fps = 20
-                    target_fps = 20
+                    target_fps = 20 # lowest fps
 
                 target_fps = 20 if target_fps < 20 else target_fps
                 target_fps = int(target_fps)
-                print(optimization_index, target_fps)
+                # print(optimization_index, target_fps)
                 time_before_game_loop = time.time()
                 print(f"Battery unused: {battery_unused}%, CPU unused: {cpu_unused}%, VRAM unused: {vram_unused}%, Optimization index: {optimization_index},fps:{fps}")
                 
@@ -576,21 +598,23 @@ def gameloop():
             else:
                 fps = target_fps
 
-            if target_fps >= 48 and target_fps <= 60 and init_velocity != 7:
-                init_velocity = 7
-                print("12")
-            elif target_fps <48 and target_fps >= 30 and init_velocity != 12:
-                init_velocity = 12
-            elif target_fps < 30 and init_velocity != 16:
-                init_velocity = 16
-            # print(fps, target_fps)
+            # Previous temporary solution to adjust the snake's speed based on the target FPS,
+            # now replaced with a more dynamic approach.
 
-            init_velocity += init_velocity_change
+            # if target_fps >= 48 and target_fps <= 60 and init_velocity != 7:
+            #     init_velocity = 7
+            #     # print("12")
+            # elif target_fps <48 and target_fps >= 30 and init_velocity != 12:
+            #     init_velocity = 12
+            # elif target_fps < 30 and init_velocity != 16:
+            #     init_velocity = 16
+
+            init_velocity = BASE_VELOCITY + init_velocity_change
+            # print(init_velocity)
 
             plot_snake(game_window, blue, s_lst, snake)
 
         pygame.display.update()
-        clock.tick(fps)
 
     pygame.quit()
     sys.exit()
