@@ -31,6 +31,7 @@ def resource_path(relative_path):
 GAME_VERSION = __doc__.split("\n")[0]
 print(__doc__, end="")
 snake = 30
+testing_mode = False
 DEFAULT_FPS = 60
 scr = []
 today_date = datetime.date.today()
@@ -72,6 +73,7 @@ red = (255, 0, 0)
 white = (255, 255, 255)
 green = (0, 250, 10)
 black = (0, 0, 0)
+orange = (240, 150,7)
 yellow = (240, 250, 5)
 time1 = 0
 time_taken_to_score = 0
@@ -99,7 +101,7 @@ first_line_of_file = gamefilecontent.split("\n")[0] if gamefilecontent else ""
 should_reset_gamefilecontent = (
     not first_line_of_file.isdigit() or
     not in_game_info[1].replace('.', '', 1).isdigit() or
-    not len(in_game_info)>3 or
+    len(in_game_info)>3 or
     in_game_info[2] not in ('True', 'False')
 )
 
@@ -297,12 +299,14 @@ def gameloop():
     global in_game_info
     global Dynamic_FPS
     global time_taken_to_score
+    global testing_mode
 
     # ctime = time.localtime()
     # ctime = time.strftime("%H-%M-%S")
     # starting_time_for_timer = time.time()
     # timer = f"{}:{}:{time.time()-starting_time_for_timer}"
     time1 = None
+    test_mode_time_start = 0
 
     collrate = 12
     trailing_buffer = 5
@@ -366,14 +370,14 @@ def gameloop():
             game_window.fill(white)
             game_window.blit(go, (0, 0))
             load_text('           PRESS ENTER TO CONTINUE',
-                  red, 900/2-300, 600/2+125)
+                  red, 900/2-300, 600/2+115)
             load_text(f'Highscore: {h_score}                                 Highest Appocity: {h_appocity}', blue, 50, 7)
-            load_text('Made By Hashir Ahmad', blue, 300, 500+20)
+            load_text('Go Again!', blue, 300+65, 500+68)
             scr.append(score)
             load_text(f'your score is : {score}, achieved in {time_taken_to_score} seconds'.capitalize()
-            ,yellow, 900/2-300+30, 600/2+100+30+20)
+            ,(yellow if not testing_mode else orange), 900/2-300+30, 600/2+100+30+20)
             load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if appocity == 1 else "apples"}/second'.capitalize()
-            ,yellow, 900/2-300+40, 600/2+100+60+20)
+            ,(yellow if not testing_mode else orange), 900/2-300+40, 600/2+100+60+20)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -400,6 +404,9 @@ def gameloop():
                         menuscreen()
 
         else:
+            # Main Game
+            game_window.fill(white)
+            game_window.blit(bk, (0, 0))
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     time_taken_to_score = (round(time.time() - time1, 2) - time_paused) if time1 is not None else 0
@@ -435,6 +442,11 @@ def gameloop():
                             pygame.mixer.music.stop()
                             pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
                             pygame.mixer.music.play(-1)
+                    # Testing Mode: LCtrl + T
+                    if event.key == pygame.K_t and pygame.key.get_mods() & pygame.KMOD_LCTRL:
+                        testing_mode = not testing_mode
+                        test_mode_time_start = time.time()
+                        print(testing_mode)
                     if event.key == pygame.K_F3:
                         Dynamic_FPS = not Dynamic_FPS
                         if not Dynamic_FPS:
@@ -451,7 +463,7 @@ def gameloop():
                     elif (event.key == pygame.K_DOWN or event.key == pygame.K_s) and velocity_y == 0:
                         velocity_y = init_velocity
                         velocity_x = 0
-                    elif event.key == pygame.K_i:
+                    elif event.key == pygame.K_i and testing_mode:
                         if random.choice([1,2,3]) == 2:
                             score += 10
                         elif random.choice([1,2,3,4,5,6,7,8,9,10]) == 5:
@@ -504,12 +516,17 @@ def gameloop():
                 food_x = random.randint(40, 600)
                 food_y = random.randint(40, 400)
                 s_length += s_controler
-            game_window.fill(white)
-            game_window.blit(bk, (0, 0))
 
             load_text('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10)
             # FPS indicator, green means constant frames and yellow means dynamic fps
             load_text(str(fps), (yellow if Dynamic_FPS else green), 12+850, 7)
+
+            if testing_mode:
+                if time.time()-test_mode_time_start < 0.5:
+                    load_text("Debug: Test Mode Enabled", green, 10, 575)
+            else:
+                if time.time()-test_mode_time_start < 0.5:
+                    load_text("Debug: Test Mode Disabled", red, 10, 575)
 
             # ctime = time.localtime()
             # ctime = time.strftime("%H-%M-%S")
