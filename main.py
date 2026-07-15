@@ -347,12 +347,12 @@ def gameloop():
             fps = 30
             appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
             # Checking if the current appocity is greater than the highest appocity and updating it if necessary
-            if appocity is not None and (appocity) > float(h_appocity):
+            if appocity is not None and (appocity) > float(h_appocity) and not testing_mode:
                 h_appocity = str(appocity)
                 in_game_info[1] = str(appocity)
             
             # Checking if the current score is greater than the highscore and updating it if necessary
-            if score > int(h_score):
+            if score > int(h_score) and not testing_mode:
                 h_score = str(score)
                 in_game_info[0] = str(score)
             
@@ -519,7 +519,7 @@ def gameloop():
 
             load_text('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10)
             # FPS indicator, green means constant frames and yellow means dynamic fps
-            load_text(str(fps), (yellow if Dynamic_FPS else green), 12+850, 7)
+            load_text(str(fps), (yellow if Dynamic_FPS else green), (12+850 if len(str(fps)) < 3 else 12+837), 7)
 
             if testing_mode:
                 if time.time()-test_mode_time_start < 0.5:
