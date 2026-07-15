@@ -47,17 +47,17 @@ icon = pygame.image.load(resource_path('assets/appicon.png'))
 icon = pygame.transform.scale(icon, (32, 32)).convert_alpha()
 pygame.display.set_icon(icon)
 pygame.display.set_caption(GAME_VERSION)
-myimg = pygame.image.load(resource_path('assets/images.png'))
+myimg = pygame.image.load(resource_path('assets/menu_screen_image.png'))
 myimg = pygame.transform.scale(myimg, (900, 600)).convert_alpha()
-go = pygame.image.load(resource_path('assets/g_over.png'))
+go = pygame.image.load(resource_path('assets/game_over_screen.png'))
 go = pygame.transform.scale(go, (900, 600)).convert_alpha()
-bk = pygame.image.load(resource_path('assets/back.png'))
+bk = pygame.image.load(resource_path('assets/background_image.png'))
 bk = pygame.transform.scale(bk, (900, 600)).convert_alpha()
-apl = pygame.image.load(resource_path('assets/app.png'))
+apl = pygame.image.load(resource_path('assets/apple.png'))
 apl = pygame.transform.scale(apl, (snake, snake)).convert_alpha()
 # s_i = pygame.image.load(resource_path('assets/sicon.png'))
 # si = pygame.transform.scale(s_i, (43, 43)).convert_alpha()
-setting_page = pygame.image.load(resource_path('assets/settingpage.png'))
+setting_page = pygame.image.load(resource_path('assets/settings_page_image.png'))
 setting_page = pygame.transform.scale(setting_page, (900, 600)).convert_alpha()
 display_refresh_rate = pygame.display.get_current_refresh_rate()
 p.cpu_percent(interval=None); time.sleep(0.3)
@@ -164,7 +164,7 @@ def independendence_day_page():
             if event.type == pygame.QUIT:
                 quit_game = True
                 if not mute_music:
-                    pygame.mixer.music.load(resource_path("assets/b.mp3"))
+                    pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
                     pygame.mixer.music.play(-1)
                 return quit_game
             if event.type == pygame.KEYDOWN:
@@ -189,7 +189,7 @@ def Pause_Window():
                 quit_game = True
                 sys.exit()
                 if not mute_music:
-                    pygame.mixer.music.load(resource_path("assets/b.mp3"))
+                    pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
                     pygame.mixer.music.play(-1)
                 return quit_game
             if event.type == pygame.KEYDOWN:
@@ -233,7 +233,7 @@ def settingpage():
 def menuscreen():
     """Main menu screen, where the game starts and user can access settings or start the game."""
     if not mute_music:
-        pygame.mixer.music.load(resource_path("assets/c.mp3"))
+        pygame.mixer.music.load(resource_path("assets/menu_screen_music.mp3"))
         pygame.mixer.music.set_volume(0.3)
         pygame.mixer.music.play(-1)
     quit_game = False
@@ -259,17 +259,17 @@ def menuscreen():
                     if m_p[0] > 817 and m_p[0] < 845 and m_p[1] > 56 and m_p[1] < 90:
                         print('successful')
                         if not mute_music:
-                            pygame.mixer.music.load(resource_path("assets/settingsound.mp3"))
+                            pygame.mixer.music.load(resource_path("assets/settings_page_music.mp3"))
                             pygame.mixer.music.play()
                         settingpage()
                         if not mute_music:
-                            pygame.mixer.music.load(resource_path("assets/c.mp3"))
+                            pygame.mixer.music.load(resource_path("assets/menu_screen_music.mp3"))
                             pygame.mixer.music.play(-1)
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
                     if not mute_music:
-                        pygame.mixer.music.load(resource_path("assets/b.mp3"))
+                        pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
                         pygame.mixer.music.play(-1)
                     gameloop()
 
@@ -377,11 +377,11 @@ def gameloop():
                             pygame.mixer.music.pause()
                         else:
                             pygame.mixer.music.stop()
-                            pygame.mixer.music.load(resource_path("assets/a.mp3"))
+                            pygame.mixer.music.load(resource_path("assets/game_over_music.mp3"))
                             pygame.mixer.music.play(-1)
                     if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE or event.key == pygame.K_o:
                         if not mute_music:
-                            pygame.mixer.music.load(resource_path("assets/b.mp3"))
+                            pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
                             pygame.mixer.music.play(-1)
                         scr.clear()
                         gameloop()
@@ -458,7 +458,7 @@ def gameloop():
                         else:
                             time_taken_to_score = 0
                         if not mute_music:
-                            pygame.mixer.music.load(resource_path("assets/a.mp3"))
+                            pygame.mixer.music.load(resource_path("assets/game_over_music.mp3"))
                             pygame.mixer.music.play(-1)
                     elif event.key == pygame.K_x:
                         s_controler += 3
@@ -530,7 +530,7 @@ def gameloop():
                     time_taken_to_score = 0
 
                 if not mute_music:
-                    pygame.mixer.music.load(resource_path("assets/a.mp3"))
+                    pygame.mixer.music.load(resource_path("assets/game_over_music.mp3"))
                     pygame.mixer.music.play(-1)
 
             game_window.blit(apl, (food_x, food_y))
@@ -555,7 +555,7 @@ def gameloop():
                     time_taken_to_score = 0
 
                 if not mute_music:
-                    pygame.mixer.music.load(resource_path("assets/a.mp3"))
+                    pygame.mixer.music.load(resource_path("assets/game_over_music.mp3"))
                     pygame.mixer.music.play(-1)
 
             if time.time()-time_before_game_loop >= 3 and Dynamic_FPS:
