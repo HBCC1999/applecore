@@ -232,6 +232,7 @@ def settingpage():
 
 def menuscreen():
     """Main menu screen, where the game starts and user can access settings or start the game."""
+    global mute_music
     if not mute_music:
         pygame.mixer.music.load(resource_path("assets/menu_screen_music.mp3"))
         pygame.mixer.music.set_volume(0.3)
@@ -267,6 +268,14 @@ def menuscreen():
                             pygame.mixer.music.play(-1)
 
             elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F1:
+                    mute_music = not mute_music
+                    if mute_music:
+                        pygame.mixer.music.pause()
+                    else:
+                        pygame.mixer.music.stop()
+                        pygame.mixer.music.load(resource_path("assets/menu_screen_music.mp3"))
+                        pygame.mixer.music.play(-1)
                 if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
                     if not mute_music:
                         pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
@@ -381,6 +390,7 @@ def gameloop():
                             pygame.mixer.music.play(-1)
                     if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE or event.key == pygame.K_o:
                         if not mute_music:
+                            pygame.mixer.music.stop()
                             pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
                             pygame.mixer.music.play(-1)
                         scr.clear()
@@ -422,7 +432,9 @@ def gameloop():
                         if mute_music:
                             pygame.mixer.music.pause()
                         else:
-                            pygame.mixer.music.unpause()
+                            pygame.mixer.music.stop()
+                            pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
+                            pygame.mixer.music.play(-1)
                     if event.key == pygame.K_F3:
                         Dynamic_FPS = not Dynamic_FPS
                         if not Dynamic_FPS:
