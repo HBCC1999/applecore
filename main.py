@@ -98,12 +98,15 @@ in_game_info = gamefilecontent.split("\n")
 
 first_line_of_file = gamefilecontent.split("\n")[0] if gamefilecontent else ""
 
-should_reset_gamefilecontent = (
-    not first_line_of_file.isdigit() or
-    not in_game_info[1].replace('.', '', 1).isdigit() or
-    len(in_game_info)>3 or
-    in_game_info[2] not in ('True', 'False')
-)
+try:
+    should_reset_gamefilecontent = (
+        not first_line_of_file.isdigit() or
+        not in_game_info[1].replace('.', '', 1).isdigit() or
+        len(in_game_info)>3 or
+        in_game_info[2] not in ('True', 'False')
+    )
+except IndexError:
+    should_reset_gamefilecontent = True # The file is corrupted or empty
 
 if should_reset_gamefilecontent:
     with open(resource_path('assets/highscores.txt'), 'w') as f:
@@ -485,9 +488,12 @@ def gameloop():
                             pygame.mixer.music.load(resource_path("assets/game_over_music.mp3"))
                             pygame.mixer.music.play(-1)
                     elif event.key == pygame.K_x:
-                        s_controler += 3
+                        s_controler += 2
                     elif event.key == pygame.K_z:
-                        s_controler -= 3
+                        if s_controler > 2:
+                            s_controler -= 2
+                        else:
+                            s_controler = 0 # Golden Dandelion which is a golden dandelion
                     elif event.key == pygame.K_e:
                         collrate = 16
                     elif event.key == pygame.K_m:
