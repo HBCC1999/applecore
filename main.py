@@ -1,4 +1,4 @@
-"""Applecore (Standard) v3.7-alpha.1
+"""Applecore (Standard) v3.7-beta.1
 Developed by HBCC1999
 Textures: Some are made by the author and some are AI-generated.
 Audio: From Youtube Studio
@@ -255,7 +255,7 @@ def menuscreen():
         # load_text("Hello "+user_name+"!".title(), blue, 510, 50, b=True)
         # load_text('Help him out!!!'.title(), yellow, 300, 260)
         # load_text('press the space bar to play :)', yellow, 250, 400, True)\
-        load_text(f'version: {GAME_VERSION[GAME_VERSION.index("v"):]}', yellow, 320, 500)
+        load_text(f'version: {GAME_VERSION[GAME_VERSION.index("v"):]}', yellow, 300, 500)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -402,7 +402,7 @@ def gameloop():
             ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+30, 600/2+100+30+20, bold = False)
             load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if appocity == 1 else "apples"}/second'.capitalize()
             ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+50, 600/2+100+60+20, bold=False)
-            load_text(f'Difficulty: {difficulty}', color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow), x = 900/2-300+120, y = 600/2+100+90+20)
+            load_text(f'Difficulty: {difficulty}', color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow), x = 900/2-300+140, y = 600/2+100+90+20)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
