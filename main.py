@@ -399,9 +399,9 @@ def gameloop():
             load_text('Go Again!', blue, 300+65, 500+68)
             scr.append(score)
             load_text(f'your score is : {score}, achieved in {time_taken_to_score} seconds'.capitalize()
-            ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+30, 600/2+100+30+20)
+            ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+30, 600/2+100+30+20, bold = False)
             load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if appocity == 1 else "apples"}/second'.capitalize()
-            ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+50, 600/2+100+60+20)
+            ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+50, 600/2+100+60+20, bold=False)
             load_text(f'Difficulty: {difficulty}', color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow), x = 900/2-300+120, y = 600/2+100+90+20)
 
             for event in pygame.event.get():
@@ -431,11 +431,9 @@ def gameloop():
 
         else:
             # Main Game
-            game_window.fill(white)
-            game_window.blit(bk, (0, 0))
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    time_taken_to_score = (round(time.time() - time1, 2) - time_paused) if time1 is not None else 0
+                    time_taken_to_score = round(time.time() - time1 - time_paused, 2) if time1 is not None else 0
                     appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
                     # Checking if the current appocity is greater than the highest appocity and updating it if necessary
                     if appocity is not None and (appocity) > float(h_appocity):
@@ -509,7 +507,7 @@ def gameloop():
                     elif event.key == pygame.K_o:
                         game_over = True
                         if time1 is not None:
-                            time_taken_to_score = round(time.time() - time1, 2) - time_paused
+                            time_taken_to_score = round(time.time() - time1 - time_paused, 2)
                         else:
                             time_taken_to_score = 0
                         if not mute_music:
@@ -537,6 +535,9 @@ def gameloop():
                         apple_collrate = 4
                         s_controler = 6
                         difficulty_velocity_change = round((BASE_VELOCITY)*(30/100))
+
+            game_window.fill(white)
+            game_window.blit(bk, (0, 0))
 
             if (velocity_x != 0 or velocity_y !=0) and time1 is None:
                 time1 = time.time()
@@ -613,6 +614,7 @@ def gameloop():
                     pygame.mixer.music.play(-1)
 
             game_window.blit(apl, (food_x, food_y))
+
 
             if is_independence_day:
                 # 20% chance for the green apple to appear(only on 14 August)
@@ -699,7 +701,10 @@ def gameloop():
                     init_velocity = floor
                     init_velocity_change = 0
 
+
             plot_snake(game_window, blue, s_lst, snake) # Draw the snake
+
+
             if pause_game:
                 time_paused += Pause_Window()
                 pause_game = False
