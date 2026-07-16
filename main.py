@@ -32,6 +32,7 @@ GAME_VERSION = __doc__.split("\n")[0]
 print(__doc__, end="")
 snake = 30
 testing_mode = False
+I_key_used = False
 DEFAULT_FPS = 60
 scr = []
 today_date = datetime.date.today()
@@ -303,6 +304,7 @@ def gameloop():
     global Dynamic_FPS
     global time_taken_to_score
     global testing_mode
+    global I_key_used
 
     # ctime = time.localtime()
     # ctime = time.strftime("%H-%M-%S")
@@ -347,15 +349,16 @@ def gameloop():
         dt = clock.tick(fps) / 1000.0  # Amount of seconds between each loop/frame and seconds because i follow SI units.
         dt = min(dt, 0.05) # Cap it at 50ms. So no stutters and wierd teleportation after toggling pause_menu
         if game_over:
+            I_key_used = False
             fps = 30
             appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
             # Checking if the current appocity is greater than the highest appocity and updating it if necessary
-            if appocity is not None and (appocity) > float(h_appocity) and not testing_mode:
+            if appocity is not None and (appocity) > float(h_appocity) and not testing_mode and not I_key_used:
                 h_appocity = str(appocity)
                 in_game_info[1] = str(appocity)
             
             # Checking if the current score is greater than the highscore and updating it if necessary
-            if score > int(h_score) and not testing_mode:
+            if score > int(h_score) and not testing_mode and not I_key_used:
                 h_score = str(score)
                 in_game_info[0] = str(score)
             
@@ -378,9 +381,9 @@ def gameloop():
             load_text('Go Again!', blue, 300+65, 500+68)
             scr.append(score)
             load_text(f'your score is : {score}, achieved in {time_taken_to_score} seconds'.capitalize()
-            ,(yellow if not testing_mode else orange), 900/2-300+30, 600/2+100+30+20)
+            ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+30, 600/2+100+30+20)
             load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if appocity == 1 else "apples"}/second'.capitalize()
-            ,(yellow if not testing_mode else orange), 900/2-300+40, 600/2+100+60+20)
+            ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+40, 600/2+100+60+20)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -467,6 +470,7 @@ def gameloop():
                         velocity_y = init_velocity
                         velocity_x = 0
                     elif event.key == pygame.K_i and testing_mode:
+                        I_key_used = True
                         if random.choice([1,2,3]) == 2:
                             score += 10
                         elif random.choice([1,2,3,4,5,6,7,8,9,10]) == 5:
