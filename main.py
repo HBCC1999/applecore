@@ -30,6 +30,7 @@ def resource_path(relative_path):
 
 GAME_VERSION = __doc__.split("\n")[0]
 print(__doc__, end="")
+
 snake = 30
 testing_mode = False
 I_key_used = False
@@ -145,24 +146,20 @@ def usertext(event):
 
 # font
 # printing text on game
-def load_text(text, color, x, y, b=False):
+def load_text(text, color, x, y, bold=True, italic=True,size=40):
     """
     Shows Text on Window, b is for bold text, if b is True then the text will be bold, if b is False then the text will be normal.
     """
-    if not b:
-        font = pygame.font.SysFont(None, 40, italic=True)
-        txt = font.render(text, True, color)
-        game_window.blit(txt, (x, y))
-    elif b:
-        font = pygame.font.SysFont(None, 40, bold=True)
-        txt = font.render(text, True, color)
-        game_window.blit(txt, (x, y))
+    font = pygame.font.SysFont(None, size=size, italic=italic, bold=bold)
+    txt = font.render(text, True, color)
+    game_window.blit(txt, (x, y))
 
 def independendence_day_page():
     """An easter egg to celibrate Pakistan's Independence day on 14th August. (any year)"""
     pygame.event.clear()
     start_time = time.time()
     quit_game = False
+
     while not quit_game:
         game_window.fill((220, 200, 240))
         elapsed = time.time() - start_time
@@ -173,6 +170,7 @@ def independendence_day_page():
                     pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
                     pygame.mixer.music.play(-1)
                 return quit_game
+            
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     return quit_game
@@ -189,6 +187,7 @@ def Pause_Window():
     so as to provide legitimate gameplay. Also the FPS indicator is not shown in this state."""
     quit_game = False
     s_time = time.time()
+
     while not quit_game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -198,12 +197,14 @@ def Pause_Window():
                     pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
                     pygame.mixer.music.play(-1)
                 return quit_game
+            
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pause_game = False
                     quit_game=True
                     time_paused = time.time() - s_time
                     return time_paused
+                
         pygame.display.update()
         clock.tick(30)
 
@@ -211,6 +212,7 @@ def settingpage():
     """Settings page, coming soon!"""
     allowuinput = False
     quit_game = False
+
     while not quit_game:
         game_window.fill((220, 200, 240))
         game_window.blit(setting_page, (0, 0))
@@ -247,6 +249,7 @@ def menuscreen():
     while not quit_game:
         game_window.fill((220, 200, 240))
         game_window.blit(myimg, (0, 0))
+
         # game_window.blit(si, (817, 56))
         # load_text('Pyth0n wants to eat some apples...'.title(), yellow, 200, 150)
         # load_text("Hello "+user_name+"!".title(), blue, 510, 50, b=True)
@@ -259,6 +262,7 @@ def menuscreen():
                 quit_game = True
                 pygame.quit()
                 sys.exit()
+
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     print(event.pos)
@@ -310,6 +314,7 @@ def gameloop():
     # ctime = time.strftime("%H-%M-%S")
     # starting_time_for_timer = time.time()
     # timer = f"{}:{}:{time.time()-starting_time_for_timer}"
+
     time1 = None
     test_mode_time_start = 0
 
@@ -336,9 +341,12 @@ def gameloop():
     snake = 30
     snake_x = random.randint(350,520)
     snake_y = random.randint(200,400)
+
     velocity_x = 0
     velocity_y = 0
     init_velocity = BASE_VELOCITY
+    init_velocity_change = 0
+
     pause_game = False
     s_lst = []
     s_length = 1
@@ -346,14 +354,16 @@ def gameloop():
     time_paused = 0
     show_green_apple = random.choice([False, False, False, False, True])
     time_before_game_loop = time.time()
-    init_velocity_change = 0
+
     while not quit_game:
         dt = clock.tick(fps) / 1000.0  # Amount of seconds between each loop/frame and seconds because i follow SI units.
         dt = min(dt, 0.05) # Cap it at 50ms. So no stutters and wierd teleportation after toggling pause_menu
+    
         if game_over:
             I_key_used = False
             fps = 30
             appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
+            
             # Checking if the current appocity is greater than the highest appocity and updating it if necessary
             if appocity is not None and (appocity) > float(h_appocity) and not testing_mode and not I_key_used:
                 h_appocity = str(appocity)
@@ -374,13 +384,15 @@ def gameloop():
             # with open(resource_path("assets/highscores.txt")) as i:
             #     h_appocity = int(i.read()[i.read().index("\n")+1:])
             # print(h_appocity)
+
             show_green_apple = random.choice([False, False, False, False, True])
             game_window.fill(white)
             game_window.blit(go, (0, 0))
             difficulty = "Easy" if apple_collrate == 16 else "Medium" if apple_collrate == 9 else "Hard" if apple_collrate == 6 else "Ultra-Hard" if apple_collrate == 4 else "Default"
+            
             load_text('           PRESS ENTER TO CONTINUE',
                   red, 900/2-300, 600/2+115)
-            load_text(f'Highscore: {h_score}                                 Highest Appocity: {h_appocity}', blue, 50, 7)
+            load_text(f'Highscore: {h_score}                                 Highest Appocity: {h_appocity}', blue, 50, 7,bold=False )
             load_text('Go Again!', blue, 300+65, 500+68)
             scr.append(score)
             load_text(f'your score is : {score}, achieved in {time_taken_to_score} seconds'.capitalize()
@@ -402,6 +414,7 @@ def gameloop():
                             pygame.mixer.music.stop()
                             pygame.mixer.music.load(resource_path("assets/game_over_music.mp3"))
                             pygame.mixer.music.play(-1)
+
                     if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE or event.key == pygame.K_o:
                         if not mute_music:
                             pygame.mixer.music.stop()
@@ -438,8 +451,8 @@ def gameloop():
                     with open(resource_path('assets/highscores.txt'), 'w') as f:
                         # f.write(str(h_score)+f.read()[0:f.read().index("\n")])
                         f.write("\n".join(in_game_info))
-
                     quit_game = True
+
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         pause_game = True
@@ -535,15 +548,16 @@ def gameloop():
                 s_length += s_controler
 
             load_text('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10)
+
             # FPS indicator, green means constant frames and yellow means dynamic fps
             load_text(str(fps), (yellow if Dynamic_FPS else green), (12+850 if len(str(fps)) < 3 else 12+837), 7)
 
             if testing_mode:
                 if time.time()-test_mode_time_start < 0.5:
-                    load_text("Debug: Test Mode Enabled", green, 10, 575)
+                    load_text("Debug: Test Mode Enabled", green, 10, 570)
             else:
                 if time.time()-test_mode_time_start < 0.5:
-                    load_text("Debug: Test Mode Disabled", red, 10, 575)
+                    load_text("Debug: Test Mode Disabled", red, 10, 570)
 
             # ctime = time.localtime()
             # ctime = time.strftime("%H-%M-%S")
@@ -617,14 +631,17 @@ def gameloop():
                 if battery_unused == 100 or p.sensors_battery().power_plugged:
                     # fps = display_refresh_rate
                     target_fps = display_refresh_rate
+
                 if optimization_index >= 25:
                     # fps = display_refresh_rate
                     target_fps = display_refresh_rate
+
                 elif (optimization_index != 0 and optimization_index < 25 and optimization_index >= 12) and battery_unused<30:
                     if display_refresh_rate >= 60:
                         target_fps = (round(optimization_index)* optimization_constant)/100 * display_refresh_rate
                     elif display_refresh_rate < 60:
                         target_fps = (round(optimization_index)* optimization_constant)/100 * display_refresh_rate
+                        
                 elif (optimization_index != 0 and optimization_index < 25 and optimization_index >= 12) and battery_unused>=25:
                     target_fps = 48 # mid-tear fps
                 else:
@@ -662,7 +679,6 @@ def gameloop():
                 if init_velocity < floor:
                     init_velocity = floor
                     init_velocity_change = 0
-            print(init_velocity)
 
             plot_snake(game_window, blue, s_lst, snake)
 
