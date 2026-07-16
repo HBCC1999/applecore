@@ -243,7 +243,7 @@ def menuscreen():
     global mute_music
     if not mute_music:
         pygame.mixer.music.load(resource_path("assets/menu_screen_music.mp3"))
-        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1)
     quit_game = False
     while not quit_game:
