@@ -313,6 +313,7 @@ def gameloop():
     time1 = None
     test_mode_time_start = 0
 
+    apple_collrate = 12
     collrate = 12
     trailing_buffer = 5
     fps = DEFAULT_FPS
@@ -327,6 +328,7 @@ def gameloop():
     score = 0
 
     # entity - related variables and constants
+    difficulty_velocity_change = 0
     food_x = random.randint(40, 800)
     food_y = random.randint(50, 500)
     green_food_x= random.randint(20,900)
@@ -375,6 +377,7 @@ def gameloop():
             show_green_apple = random.choice([False, False, False, False, True])
             game_window.fill(white)
             game_window.blit(go, (0, 0))
+            difficulty = "Easy" if apple_collrate == 16 else "Medium" if apple_collrate == 9 else "Hard" if apple_collrate == 6 else "Ultra-Hard" if apple_collrate == 4 else "Default"
             load_text('           PRESS ENTER TO CONTINUE',
                   red, 900/2-300, 600/2+115)
             load_text(f'Highscore: {h_score}                                 Highest Appocity: {h_appocity}', blue, 50, 7)
@@ -383,7 +386,8 @@ def gameloop():
             load_text(f'your score is : {score}, achieved in {time_taken_to_score} seconds'.capitalize()
             ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+30, 600/2+100+30+20)
             load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if appocity == 1 else "apples"}/second'.capitalize()
-            ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+40, 600/2+100+60+20)
+            ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+50, 600/2+100+60+20)
+            load_text(f'Difficulty: {difficulty}', color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow), x = 900/2-300+120, y = 600/2+100+90+20)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -499,17 +503,20 @@ def gameloop():
                         else:
                             s_controler = 0 # Golden Dandelion which is a golden dandelion
                     elif event.key == pygame.K_e:
-                        collrate = 16
+                        apple_collrate = 16
+                        difficulty_velocity_change = 0
                     elif event.key == pygame.K_m:
-                        collrate = 9
+                        apple_collrate = 9
                         s_controler = 4
+                        difficulty_velocity_change = 0
                     elif event.key == pygame.K_h:
-                        collrate = 6
+                        apple_collrate = 6
                         s_controler = 5
+                        difficulty_velocity_change = round((BASE_VELOCITY)*(15/100))
                     elif event.key == pygame.K_u:
-                        collrate = 4
+                        apple_collrate = 4
                         s_controler = 6
-                        init_velocity = 9
+                        difficulty_velocity_change = round((BASE_VELOCITY)*(30/100))
 
             if (velocity_x != 0 or velocity_y !=0) and time1 is None:
                 time1 = time.time()
@@ -520,7 +527,7 @@ def gameloop():
             snake_x += (velocity_x_f)
             snake_y += (velocity_y_f)
 
-            if abs(snake_x-food_x) < collrate and abs(snake_y-food_y) < collrate:
+            if abs(snake_x-food_x) < apple_collrate and abs(snake_y-food_y) < apple_collrate:
                 score += 10
                 # print(s_lst)
                 food_x = random.randint(40, 600)
@@ -579,7 +586,7 @@ def gameloop():
                 if show_green_apple:
                     pygame.draw.rect(game_window, (0, 130, 0),
                     pygame.Rect(green_food_x,green_food_y,snake,snake))
-                    if abs(snake_x-green_food_x) < collrate and abs(snake_y-green_food_y) < collrate:
+                    if abs(snake_x-green_food_x) < apple_collrate and abs(snake_y-green_food_y) < apple_collrate:
                         pygame.mixer.music.stop()
                         if independendence_day_page():
                             break
@@ -648,8 +655,14 @@ def gameloop():
             # elif target_fps < 30 and init_velocity != 16:
             #     init_velocity = 16
 
-            init_velocity = BASE_VELOCITY + init_velocity_change
-            # print(init_velocity)
+            init_velocity = BASE_VELOCITY + difficulty_velocity_change + init_velocity_change
+            # Works according to game difficulty
+            if difficulty_velocity_change != 0:
+                floor = BASE_VELOCITY + difficulty_velocity_change
+                if init_velocity < floor:
+                    init_velocity = floor
+                    init_velocity_change = 0
+            print(init_velocity)
 
             plot_snake(game_window, blue, s_lst, snake)
 
