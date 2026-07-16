@@ -318,8 +318,11 @@ def gameloop():
     time1 = None
     test_mode_time_start = 0
 
+    snake = 30
     apple_collrate = 12
     collrate = 12
+    segment_spacing = 6 # How spaced each square should be, lower value equals better visuals
+    distance_since_last_segment = 0
     trailing_buffer = 5
     fps = DEFAULT_FPS
 
@@ -338,7 +341,6 @@ def gameloop():
     food_y = random.randint(50, 500)
     green_food_x= random.randint(20,900)
     green_food_y= random.randint(30,525)
-    snake = 30
     snake_x = random.randint(350,520)
     snake_y = random.randint(200,400)
 
@@ -348,7 +350,8 @@ def gameloop():
     init_velocity_change = 0
 
     pause_game = False
-    s_lst = []
+    s_lst = [[int(snake_x), int(snake_y)]]
+    direction_changed = False
     s_length = 1
     s_controler = 3
     time_paused = 0
@@ -455,8 +458,8 @@ def gameloop():
 
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        pause_game = True
-                        time_paused = Pause_Window()
+                        pause_game = not pause_game
+                        # time_paused = Pause_Window()
                     if event.key == pygame.K_F1:
                         mute_music = not mute_music
                         if mute_music:
@@ -477,15 +480,19 @@ def gameloop():
                     if (event.key == pygame.K_RIGHT or event.key == pygame.K_d) and velocity_x == 0:
                         velocity_x = init_velocity
                         velocity_y = 0
+                        direction_changed = True
                     elif (event.key == pygame.K_LEFT or event.key == pygame.K_a) and velocity_x == 0:
                         velocity_x = -init_velocity
                         velocity_y = 0
+                        direction_changed = True
                     elif (event.key == pygame.K_UP or event.key == pygame.K_w) and velocity_y == 0:
                         velocity_y = -init_velocity
                         velocity_x = 0
+                        direction_changed = True
                     elif (event.key == pygame.K_DOWN or event.key == pygame.K_s) and velocity_y == 0:
                         velocity_y = init_velocity
                         velocity_x = 0
+                        direction_changed = True
                     elif event.key == pygame.K_i and testing_mode:
                         I_key_used = True
                         if random.choice([1,2,3]) == 2:
@@ -562,13 +569,25 @@ def gameloop():
             # ctime = time.localtime()
             # ctime = time.strftime("%H-%M-%S")
 
-            head = []
-            head.append(int(snake_x))
-            head.append(int(snake_y))
-            s_lst.append(head)
+            # New Snake rendering system(v3.7+)
+            step_dist = abs(velocity_x_f) + abs(velocity_y_f)
+            distance_since_last_segment += step_dist
+
+            # direction_changed can also be synced with velocity_x and velocity_y but this approach works just fine
+            if direction_changed:
+                s_lst.append([int(snake_x), int(snake_y)])
+                distance_since_last_segment = 0
+                direction_changed = False
+
+            while distance_since_last_segment >= segment_spacing:
+                head = []
+                head.append(int(snake_x))
+                head.append(int(snake_y))
+                s_lst.append(head)
+                distance_since_last_segment -= segment_spacing
 
             if len(s_lst) > s_length:
-                del s_lst[0]
+                del s_lst[0:len(s_lst) - s_length]
             
             # New version of self-collision check to comply with the new snake motion system
             # deadly_apple:
@@ -680,7 +699,10 @@ def gameloop():
                     init_velocity = floor
                     init_velocity_change = 0
 
-            plot_snake(game_window, blue, s_lst, snake)
+            plot_snake(game_window, blue, s_lst, snake) # Draw the snake
+            if pause_game:
+                time_paused += Pause_Window()
+                pause_game = False
 
         pygame.display.update()
 
