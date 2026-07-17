@@ -338,6 +338,7 @@ def gameloop():
 
     time1 = None
     test_mode_time_start = 0
+    I_key_used = False
 
     snake = 30
     apple_collrate = 12
@@ -384,7 +385,6 @@ def gameloop():
         dt = min(dt, 0.05) # Cap it at 50ms. So no stutters and wierd teleportation after toggling pause_menu
     
         if game_over:
-            I_key_used = False
             fps = 30
             appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
             
