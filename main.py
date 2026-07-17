@@ -563,6 +563,7 @@ def gameloop():
 
             if (velocity_x != 0 or velocity_y !=0) and time1 is None:
                 time1 = time.time()
+                time_paused = 0
 
             velocity_x_f = (velocity_x * dt)
             velocity_y_f = (velocity_y * dt)
@@ -628,7 +629,7 @@ def gameloop():
             if self_collision:
                 game_over = True
                 if time1 is not None:
-                    time_taken_to_score = round(time.time() - time1, 2)
+                    time_taken_to_score = round(time.time() - time1 - time_paused, 2)
                 else:
                     time_taken_to_score = 0
 
