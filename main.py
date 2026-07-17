@@ -202,7 +202,7 @@ def independendence_day_page():
         pygame.display.update()
     clock.tick(30)
 
-def Pause_Window():
+def pause_window():
     """Pauses the game after esc key is pressed, in this state, snake attributes 
     can't be changed and time spent in this state is not accounted for in time_taken_to_score.
     Game remains paused until esc is pressed again or game is quit.
@@ -231,19 +231,27 @@ def Pause_Window():
         pygame.display.update()
         clock.tick(30)
 
-def settingpage():
+def settings_page():
     """Settings page, coming soon!"""
+    global text_input
+    global user_name
     allowuinput = False
     quit_game = False
+    text_input = user_name
 
     while not quit_game:
         game_window.fill((220, 200, 240))
         game_window.blit(setting_page, (0, 0))
-        load_text("  "+user_name, blue, 245, 95)
+        load_text("  "+text_input, blue, 245, 95)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game = True
             elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    # Save new username
+                    save_data(data=text_input, file_name="user_info.txt")
+                    user_name = text_input
+                    load_text("Username saved successfully", x=20, y=570, color=green)
                 if event.key == pygame.K_BACKSPACE:
                     if text_input:
                         text_input=text_input[:-1]
@@ -295,7 +303,7 @@ def menuscreen():
                         if not mute_music:
                             pygame.mixer.music.load(resource_path("assets/settings_page_music.mp3"))
                             pygame.mixer.music.play()
-                        settingpage()
+                        settings_page()
                         if not mute_music:
                             pygame.mixer.music.load(resource_path("assets/menu_screen_music.mp3"))
                             pygame.mixer.music.play(-1)
@@ -478,7 +486,7 @@ def gameloop():
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         pause_game = not pause_game
-                        # time_paused = Pause_Window()
+                        # time_paused = pause_window()
                     if event.key == pygame.K_F1:
                         mute_music = not mute_music
                         if mute_music:
@@ -497,19 +505,19 @@ def gameloop():
                         Dynamic_FPS = not Dynamic_FPS
                         if not Dynamic_FPS:
                             target_fps = DEFAULT_FPS if display_refresh_rate >= DEFAULT_FPS else display_refresh_rate
-                    if (event.key == pygame.K_RIGHT or event.key == pygame.K_d) and velocity_x == 0:
+                    if (event.key == pygame.K_RIGHT or event.key == pygame.K_d) and velocity_x == 0 and init_velocity != 0:
                         velocity_x = init_velocity
                         velocity_y = 0
                         direction_changed = True
-                    elif (event.key == pygame.K_LEFT or event.key == pygame.K_a) and velocity_x == 0:
+                    elif (event.key == pygame.K_LEFT or event.key == pygame.K_a) and velocity_x == 0 and init_velocity != 0:
                         velocity_x = -init_velocity
                         velocity_y = 0
                         direction_changed = True
-                    elif (event.key == pygame.K_UP or event.key == pygame.K_w) and velocity_y == 0:
+                    elif (event.key == pygame.K_UP or event.key == pygame.K_w) and velocity_y == 0 and init_velocity != 0:
                         velocity_y = -init_velocity
                         velocity_x = 0
                         direction_changed = True
-                    elif (event.key == pygame.K_DOWN or event.key == pygame.K_s) and velocity_y == 0:
+                    elif (event.key == pygame.K_DOWN or event.key == pygame.K_s) and velocity_y == 0 and init_velocity != 0:
                         velocity_y = init_velocity
                         velocity_x = 0
                         direction_changed = True
@@ -522,10 +530,10 @@ def gameloop():
                     elif event.key == pygame.K_v:
                         init_velocity_change += 48
                     elif event.key == pygame.K_c:
-                        if init_velocity != 0 or init_velocity != 1:
+                        if init_velocity != 0 and init_velocity != 1:
                             init_velocity_change -= 48
-                        else:
-                            init_velocity_change = 0
+                        # else: #if want to reset velocity to default after pressing c beyond 0 velocity
+                        #     init_velocity_change = 0
                     elif event.key == pygame.K_o:
                         game_over = True
                         if time1 is not None:
@@ -600,7 +608,9 @@ def gameloop():
 
             # direction_changed can also be synced with velocity_x and velocity_y but this approach works just fine
             if direction_changed:
-                s_lst.append([int(snake_x), int(snake_y)])
+                # Prevents redrawing a box on almost same positions to avoid self collision in extreme-case velocity scenarios.
+                if not s_lst or abs(s_lst[-1][0]-snake_x) >= 1 or abs(s_lst[-1][1]-snake_y) >= 1:
+                    s_lst.append([int(snake_x), int(snake_y)])
                 distance_since_last_segment = 0
                 direction_changed = False
 
@@ -655,7 +665,7 @@ def gameloop():
             if snake_x < 0 or snake_x > 900 or snake_y < 0 or snake_y > 600:
                 game_over = True
                 if time1 is not None:
-                    time_taken_to_score = round(time.time() - time1, 2)
+                    time_taken_to_score = round(time.time() - time1 - time_paused, 2)
                 else:
                     time_taken_to_score = 0
 
@@ -727,6 +737,7 @@ def gameloop():
             #     init_velocity = 16
 
             init_velocity = BASE_VELOCITY + difficulty_velocity_change + init_velocity_change
+            
             # Works according to game difficulty
             if difficulty_velocity_change != 0:
                 floor = BASE_VELOCITY + difficulty_velocity_change
@@ -734,12 +745,18 @@ def gameloop():
                     init_velocity = floor
                     init_velocity_change = 0
 
+            # Sync init_velocity to both velocity_x and velocity_y
+            if velocity_x != 0:
+                velocity_x = init_velocity if velocity_x > 0 else -init_velocity
+            if velocity_y != 0:
+                velocity_y = init_velocity if velocity_y > 0 else -init_velocity
+
 
             plot_snake(game_window, blue, s_lst, snake) # Draw the snake
 
 
             if pause_game:
-                time_paused += Pause_Window()
+                time_paused += pause_window()
                 pause_game = False
 
         pygame.display.update()
