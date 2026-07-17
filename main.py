@@ -37,10 +37,12 @@ def save_data_path(file_name):
     return str(folder / file_name)
 
 def save_data(data, file_name="highscores.txt", mode="w"):
+    """Save the data to game files in Appdata/GameData, only to be used for game-data files, not assets"""
     with open(save_data_path(file_name), mode = mode) as f:
         f.write(data)
 
 def read_data(file_name="highscores.txt"):
+    """Read the data from game files in Appdata/GameData, only to be used for game-data files, not assets"""
     with open(save_data_path(file_name), "r") as f:
         data = f.read()
     return data
@@ -161,7 +163,7 @@ def usertext(event):
 
 # font
 # printing text on game
-def load_text(text: str, color: tuple, x: int, y: int, bold: int=True, italic: int=True,size: int=40):
+def load_text(text: str, color: tuple, x: int|float, y: int|float, bold: int=True, italic: int=True,size: int=40):
     """
     Shows Text on Window.
     bold = True -> Bold text
@@ -338,6 +340,7 @@ def gameloop():
 
     time1 = None
     test_mode_time_start = 0
+    Dynamic_FPS_time_start = 0
     I_key_used = False
 
     snake = 30
@@ -490,6 +493,7 @@ def gameloop():
                         test_mode_time_start = time.time()
                         print(testing_mode)
                     if event.key == pygame.K_F3:
+                        Dynamic_FPS_time_start = time.time()
                         Dynamic_FPS = not Dynamic_FPS
                         if not Dynamic_FPS:
                             target_fps = DEFAULT_FPS if display_refresh_rate >= DEFAULT_FPS else display_refresh_rate
@@ -578,12 +582,13 @@ def gameloop():
             # FPS indicator, green means constant frames and yellow means dynamic fps
             load_text(str(fps), (yellow if Dynamic_FPS else green), (12+850 if len(str(fps)) < 3 else 12+837), 7)
 
+            # Debug/Test Mode State Indication
             if testing_mode:
                 if time.time()-test_mode_time_start < 0.5:
-                    load_text("Debug: Test Mode Enabled", green, 10, 570)
+                    load_text("Debug: Test Mode Enabled", green, 10, 575, bold = False)
             else:
                 if time.time()-test_mode_time_start < 0.5:
-                    load_text("Debug: Test Mode Disabled", red, 10, 570)
+                    load_text("Debug: Test Mode Disabled", red, 10, 575, bold = False)
 
             # ctime = time.localtime()
             # ctime = time.strftime("%H-%M-%S")
@@ -657,6 +662,15 @@ def gameloop():
                     pygame.mixer.music.load(resource_path("assets/game_over_music.mp3"))
                     pygame.mixer.music.play(-1)
 
+            # Debug/Test Mode State Indication
+            if Dynamic_FPS:
+                if time.time()-Dynamic_FPS_time_start < 0.5:
+                    load_text("Debug: Dynamic FPS Enabled", green, 10, 575, bold = False)
+            else:
+                if time.time()-Dynamic_FPS_time_start < 0.5:
+                    load_text("Debug: Dynamic FPS Disabled", red, 10, 575, bold = False)
+
+            # Dynamic FPS (v3.6+)
             if time.time()-time_before_game_loop >= 3 and Dynamic_FPS:
                 cpu_unused = 100 - p.cpu_percent(interval=None)
                 # Checking if the battery sensor is available and getting the battery unused percentage, if not available setting it to 100% unused
