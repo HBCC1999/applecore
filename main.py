@@ -12,6 +12,7 @@ import sys
 import time
 import datetime
 import psutil as p
+from pathlib import Path
 
 pygame.init()
 
@@ -27,6 +28,22 @@ def resource_path(relative_path):
     except AttributeError:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
+
+def save_data_path(file_name):
+    """Path to the game-related data files, that are located in AppData/Local"""
+    appdata = os.getenv("LOCALAPPDATA")
+    folder = Path(appdata) / "Applecore" / "GameData"
+    folder.mkdir(parents=True, exist_ok=True)
+    return str(folder / file_name)
+
+def save_data(data, file_name="highscores.txt", mode="w"):
+    with open(save_data_path(file_name), mode = mode) as f:
+        f.write(data)
+
+def read_data(file_name="highscores.txt"):
+    with open(save_data_path(file_name), "r") as f:
+        data = f.read()
+    return data
 
 GAME_VERSION = __doc__.split("\n")[0]
 print(__doc__, end="")
@@ -81,21 +98,20 @@ time1 = 0
 time_taken_to_score = 0
 
 # user name
-if os.path.exists(resource_path("assets/user_info.txt")):
-    with open(resource_path("assets/user_info.txt")) as f:
-        user_name = f.read()[2:8]
+if os.path.exists(save_data_path("user_info.txt")):
+    user_name = read_data("user_info.txt").split("\n")[0]
 else:
-    with open(resource_path("assets/user_info.txt"),"w") as f:
-        f.write("")
-        user_name = 'player'
-# user_name = open(resource_path("assets/user_info.txt")).read()[2:8]
+    user_name = "Player" + str(random.randint(0, 50)) + str(random.randint(50, 100))
+    save_data(user_name, file_name="user_info.txt")
+
+print("Hello "+user_name)
+# user_name = open(resource_path("user_info.txt")).read()[2:8]
 
 # Better in-game-info management, now the game will check if the in-game-info
-# file is corrupted or not and if it is corrupted then it will reset the file to default values
+# file is corrupted or not, and if it is corrupted then it will reset the file to default values
 gamefilecontent = ""
-if os.path.exists(resource_path('assets/highscores.txt')):
-    with open(resource_path('assets/highscores.txt'), 'r') as f:
-        gamefilecontent = f.read()
+if os.path.exists(save_data_path('highscores.txt')):
+    gamefilecontent = read_data("highscores.txt")
 in_game_info = gamefilecontent.split("\n")
 
 first_line_of_file = gamefilecontent.split("\n")[0] if gamefilecontent else ""
@@ -111,8 +127,7 @@ except IndexError:
     should_reset_gamefilecontent = True # The file is corrupted or empty
 
 if should_reset_gamefilecontent:
-    with open(resource_path('assets/highscores.txt'), 'w') as f:
-        f.write("0\n0\nFalse")
+    save_data("0\n0\nFalse")
     in_game_info = ["0", "0", "False"]
 
 # This is a variable that determines whether the game should adjust its FPS based on the optimization index or not,
@@ -146,9 +161,15 @@ def usertext(event):
 
 # font
 # printing text on game
-def load_text(text, color, x, y, bold=True, italic=True,size=40):
+def load_text(text: str, color: tuple, x: int, y: int, bold: int=True, italic: int=True,size: int=40):
     """
-    Shows Text on Window, b is for bold text, if b is True then the text will be bold, if b is False then the text will be normal.
+    Shows Text on Window.
+    bold = True -> Bold text
+    italic = True -> Italic text
+    size = n -> Text size
+    (x, y) -> Coords to place text on
+    color -> RGB value of color for the foreground of text
+    text -> String
     """
     font = pygame.font.SysFont(None, size=size, italic=italic, bold=bold)
     txt = font.render(text, True, color)
@@ -380,11 +401,9 @@ def gameloop():
             if in_game_info[2] != str(Dynamic_FPS):
                 in_game_info[2] = str(Dynamic_FPS)
 
-            with open(resource_path('assets/highscores.txt'), 'w') as f:
-                # f.write(str(h_score)+f.read()[0:f.read().index("\n")])
-                f.write("\n".join(in_game_info))
+            save_data("\n".join(in_game_info))
 
-            # with open(resource_path("assets/highscores.txt")) as i:
+            # with open(resource_path("highscores.txt")) as i:
             #     h_appocity = int(i.read()[i.read().index("\n")+1:])
             # print(h_appocity)
 
@@ -449,9 +468,8 @@ def gameloop():
                     if in_game_info[2] != str(Dynamic_FPS):
                         in_game_info[2] = str(Dynamic_FPS)
 
-                    with open(resource_path('assets/highscores.txt'), 'w') as f:
-                        # f.write(str(h_score)+f.read()[0:f.read().index("\n")])
-                        f.write("\n".join(in_game_info))
+                    save_data("\n".join(in_game_info))
+
                     quit_game = True
 
                 elif event.type == pygame.KEYDOWN:
