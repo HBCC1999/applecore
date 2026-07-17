@@ -253,9 +253,12 @@ def settings_page():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     # Save new username
-                    save_data(data=text_input, file_name="user_info.txt")
-                    user_name = text_input
-                    load_text("Username saved successfully", x=20, y=570, color=green)
+                    if len(text_input) > 2:
+                        save_data(data=text_input, file_name="user_info.txt")
+                        user_name = text_input
+                        load_text("Username saved successfully", x=20, y=570, color=green)
+                    else:
+                        text_input = user_name
                 if event.key == pygame.K_BACKSPACE:
                     if text_input:
                         text_input=text_input[:-1]
@@ -271,7 +274,9 @@ def settings_page():
                         print('successful')
                     if m_p[0] > 810 and m_p[0] < 850 and m_p[1] > 27 and m_p[1] < 64:
                         pygame.mixer.music.stop()
+
                         menuscreen()
+        text_input = text_input.strip("\r")
 
         pygame.display.update()
     clock.tick(30)
