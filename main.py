@@ -196,11 +196,14 @@ def independendence_day_page():
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
+                    if not mute_music:
+                        pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
+                        pygame.mixer.music.play(-1)
                     return quit_game
             # elif elapsed >= 2:
 
         pygame.display.update()
-    clock.tick(30)
+        clock.tick(30)
 
 def pause_window():
     """Pauses the game after esc key is pressed, in this state, snake attributes 
@@ -353,7 +356,7 @@ def gameloop():
 
     snake = 30
     apple_collrate = 12
-    collrate = 12
+    collrate = 7
     segment_spacing = 6 # How spaced each square should be, lower value equals better visuals
     distance_since_last_segment = 0
     trailing_buffer = 5
@@ -656,6 +659,9 @@ def gameloop():
                     pygame.draw.rect(game_window, (0, 130, 0),
                     pygame.Rect(green_food_x,green_food_y,snake,snake))
                     if abs(snake_x-green_food_x) < apple_collrate and abs(snake_y-green_food_y) < apple_collrate:
+                        green_food_x = random.randint(20, 900)
+                        green_food_y = random.randint(30, 525)
+                        score += 30
                         pygame.mixer.music.stop()
                         if independendence_day_page():
                             break
