@@ -245,10 +245,11 @@ def settings_page():
     while not quit_game:
         game_window.fill((220, 200, 240))
         game_window.blit(setting_page, (0, 0))
-        load_text("  "+text_input, blue, 245, 95)
+        load_text("  "+text_input, blue, 323, 127, bold=False)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game = True
+                sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     # Save new username
@@ -268,6 +269,9 @@ def settings_page():
                     m_p = event.pos
                     if m_p[0] > 260 and m_p[0] < 378 and m_p[1] > 95 and m_p[1] < 117:
                         print('successful')
+                    if m_p[0] > 810 and m_p[0] < 850 and m_p[1] > 27 and m_p[1] < 64:
+                        pygame.mixer.music.stop()
+                        menuscreen()
 
         pygame.display.update()
     clock.tick(30)
@@ -301,7 +305,7 @@ def menuscreen():
                 if event.button == 1:
                     print(event.pos)
                     m_p = event.pos
-                    if m_p[0] > 817 and m_p[0] < 845 and m_p[1] > 56 and m_p[1] < 90:
+                    if m_p[0] > 801 and m_p[0] < 856 and m_p[1] > 50 and m_p[1] < 123:
                         print('successful')
                         if not mute_music:
                             pygame.mixer.music.load(resource_path("assets/settings_page_music.mp3"))
