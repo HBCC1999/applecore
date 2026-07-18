@@ -1,4 +1,4 @@
-"""Applecore (Standard) v3.7-beta.1
+"""Applecore (Standard) v3.7
 Developed by HBCC1999
 Textures: Some are made by the author and some are AI-generated.
 Audio: From Youtube Studio
