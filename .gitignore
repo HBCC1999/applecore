@@ -14,3 +14,4 @@ output/
 dist/
 build/
 plans.txt
+.wakatime-project
