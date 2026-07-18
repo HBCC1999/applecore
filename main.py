@@ -101,13 +101,15 @@ time_taken_to_score = 0
 
 # user name
 if os.path.exists(save_data_path("user_info.txt")):
-    user_name = read_data("user_info.txt").split("\n")[0]
+    username = read_data("user_info.txt").split("\n")[0]
+    if len(username) <3 or len(username) > 20:
+        username = "Player" + str(random.randint(0, 50)) + str(random.randint(50, 100))
 else:
-    user_name = "Player" + str(random.randint(0, 50)) + str(random.randint(50, 100))
-    save_data(user_name, file_name="user_info.txt")
+    username = "Player" + str(random.randint(0, 50)) + str(random.randint(50, 100))
+    save_data(username, file_name="user_info.txt")
 
-print("Hello "+user_name)
-# user_name = open(resource_path("user_info.txt")).read()[2:8]
+print("Hello "+username)
+# username = open(resource_path("user_info.txt")).read()[2:8]
 
 # Better in-game-info management, now the game will check if the in-game-info
 # file is corrupted or not, and if it is corrupted then it will reset the file to default values
@@ -153,6 +155,7 @@ def usertext(event):
     """Accepting keyboard input from user and storing in variable.
     This feature is not fully implemented yet,
     stay tuned for the future updates!"""
+    global text_input
     if event.key == pygame.K_BACKSPACE:
         if text_input:
             text_input=text_input[:-1]
@@ -236,11 +239,12 @@ def pause_window():
 
 def settings_page():
     """Settings page, coming soon!"""
+    save_text_time = 0
     global text_input
-    global user_name
+    global username
     allowuinput = False
     quit_game = False
-    text_input = user_name
+    text_input = username
 
     while not quit_game:
         game_window.fill((220, 200, 240))
@@ -251,15 +255,18 @@ def settings_page():
                 quit_game = True
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.mixer.stop()
+                    menuscreen()
+                elif event.key == pygame.K_RETURN:
                     # Save new username
-                    if len(text_input) > 2:
+                    if len(text_input) > 2 and len(text_input) <= 20:
                         save_data(data=text_input, file_name="user_info.txt")
-                        user_name = text_input
-                        load_text("Username saved successfully", x=20, y=570, color=green)
+                        username = text_input
+                        save_text_time = time.time()
                     else:
-                        text_input = user_name
-                if event.key == pygame.K_BACKSPACE:
+                        text_input = username
+                elif event.key == pygame.K_BACKSPACE:
                     if text_input:
                         text_input=text_input[:-1]
                     print(text_input)
@@ -274,12 +281,18 @@ def settings_page():
                         print('successful')
                     if m_p[0] > 810 and m_p[0] < 850 and m_p[1] > 27 and m_p[1] < 64:
                         pygame.mixer.music.stop()
-
                         menuscreen()
+
+        if time.time() - save_text_time < 1:
+            load_text("Username saved successfully", x=20, y=570, color=green)
+
         text_input = text_input.strip("\r")
+        text_input = text_input.replace(" ", "_")
+        if text_input and (text_input[0].isdigit() or not text_input[0].isascii()):
+            text_input = "_" + text_input[1:]
 
         pygame.display.update()
-    clock.tick(30)
+        clock.tick(30)
 
 def menuscreen():
     """Main menu screen, where the game starts and user can access settings or start the game."""
@@ -295,7 +308,7 @@ def menuscreen():
 
         # game_window.blit(si, (817, 56))
         # load_text('Pyth0n wants to eat some apples...'.title(), yellow, 200, 150)
-        # load_text("Hello "+user_name+"!".title(), blue, 510, 50, b=True)
+        # load_text("Hello "+username+"!".title(), blue, 510, 50, b=True)
         # load_text('Help him out!!!'.title(), yellow, 300, 260)
         # load_text('press the space bar to play :)', yellow, 250, 400, True)\
         load_text(f'version: {GAME_VERSION[GAME_VERSION.index("v"):]}', yellow, 300, 500)
