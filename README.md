@@ -1,5 +1,5 @@
 # Applecore 🍎
-A game that I made  from scratch... It is a 2D voxel style game, where you devour apples for survival with a speedrunning theme, featuring elements like appocity(score per second) and giving you the control of the snake's attributes like speed, growth factor etc, using keybinds.
+Applecore is an over-engineered, 2D voxel style game, where you devour apples for survival with a speedrunning theme, featuring elements like appocity(score per second) and giving you the control of the snake's attributes like speed, growth factor etc, using keybinds.
 
 # Controls
 
@@ -37,7 +37,7 @@ Applecore is expected to work on Windows 10 and 11 without any issues. The code 
 Works best on Win 11 or 10. Should work on Win 7, though not the executable because it bundles Python 3.11, where as win 7 works best up till Python 3.7. Linux and mac don't support exe files. Applecore is really light-weight and can run on any system, including low-end pcs, desktops, laptops etc, anything that has windows.
 
 # Issues
-For the current update, 3.6, highscores made by user are not tracked after closing the game because it is stored in file inside the executable which is read-only. This issue is expected to be fixed in future releases.
+All major issues with the game have been fixed (v3.7+). So as of now, there are no noticeable bugs. If you do find, do inform us.
 
 # History
 First version was 1.0. Though it is not available now.
@@ -46,7 +46,11 @@ Applecore 3.0 added some cool features, fixed previous bugs, and added new keybi
 Version 1.3.4 added appocity and related features.
 The texture update (v1.3.5) changed the game's textures.
 The optimization update (v3.6) added dynamic FPS along with other features. Released in April.
-Delta-Time Motion ( v3.7-alpha.1) added time-based motion and replaced the game's motion and self-collision logic.
+Delta-Time Motion (v3.7-alpha.1) added time-based motion and replaced the game's motion and self-collision logic.
+Immersive Motion and Bug Fixes (v3.7-beta.1) added pixel-based motion logic to remaining parts of game, and major bugs were fixed.
+Motion and Rendering Overhaul (v3.7) acknowledged all the changes from alpha and beta builds, and fixed games data storage while enhancing visual rendering of the game.
+
+Note: For more details on these versions, go to the releases page.
 
 # Built With
 - Python 3.11 — Programming Language
