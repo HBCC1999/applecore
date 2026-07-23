@@ -446,7 +446,7 @@ def gameloop():
             show_green_apple = random.choice([False, False, False, False, True])
             game_window.fill(white)
             game_window.blit(go, (0, 0))
-            difficulty = "Easy" if apple_collrate == 16 else "Medium" if apple_collrate == 9 else "Hard" if apple_collrate == 6 else "Ultra-Hard" if apple_collrate == 4 else "Default"
+            difficulty = "Easy" if apple_collrate == 16 else "Medium" if apple_collrate == 12 else "Hard" if apple_collrate == 8 else "Ultra-Hard" if apple_collrate == 4 else "not known"
             
             load_text('           PRESS ENTER TO CONTINUE',
                   red, 900/2-300, 600/2+115)
@@ -455,9 +455,9 @@ def gameloop():
             scr.append(score)
             load_text(f'your score is : {score}, achieved in {time_taken_to_score} seconds'.capitalize()
             ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+30, 600/2+100+30+20, bold = False)
-            load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if appocity == 1 else "apples"}/second'.capitalize()
+            load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if (appocity is not None and appocity <= 1) else "apples"}/second'.capitalize()
             ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+50, 600/2+100+60+20, bold=False)
-            load_text(f'Difficulty: {difficulty}', color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow), x = 900/2-300+140, y = 600/2+100+90+20)
+            load_text(f'Difficulty: {difficulty}', color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow), x = 900/2-300+140, y = 600/2+100+90+20, bold = False)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -579,11 +579,11 @@ def gameloop():
                         apple_collrate = 16
                         difficulty_velocity_change = 0
                     elif event.key == pygame.K_m:
-                        apple_collrate = 9
+                        apple_collrate = 12
                         s_controler = 4
                         difficulty_velocity_change = 0
                     elif event.key == pygame.K_h:
-                        apple_collrate = 6
+                        apple_collrate = 8
                         s_controler = 5
                         difficulty_velocity_change = round((BASE_VELOCITY)*(15/100))
                     elif event.key == pygame.K_u:
