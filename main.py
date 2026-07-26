@@ -69,11 +69,11 @@ icon = pygame.image.load(resource_path('assets/appicon.png'))
 icon = pygame.transform.scale(icon, (32, 32)).convert_alpha()
 pygame.display.set_icon(icon)
 pygame.display.set_caption(GAME_VERSION)
-myimg = pygame.image.load(resource_path('assets/menu_screen_image.png'))
+myimg = pygame.image.load(resource_path('assets/menu_screen_image.jpg'))
 myimg = pygame.transform.scale(myimg, (900, 600)).convert_alpha()
-go = pygame.image.load(resource_path('assets/game_over_screen.png'))
+go = pygame.image.load(resource_path('assets/game_over_screen.jpg'))
 go = pygame.transform.scale(go, (900, 600)).convert_alpha()
-bk = pygame.image.load(resource_path('assets/background_image.png'))
+bk = pygame.image.load(resource_path('assets/background_image.jpg'))
 bk = pygame.transform.scale(bk, (900, 600)).convert_alpha()
 apl = pygame.image.load(resource_path('assets/apple.png'))
 apl = pygame.transform.scale(apl, (snake, snake)).convert_alpha()
@@ -166,7 +166,9 @@ def usertext(event):
 
 # font
 # printing text on game
-def load_text(text: str, color: tuple, x: int|float, y: int|float, bold: int=True, italic: int=True,size: int=40):
+def load_text(text: str, color: tuple, x: int|float, y: int|float,
+            bold: bool=False, italic: bool=False,size: int=16, padding=4, bg_color=(70,70,70),
+            bg_alpha=128, background_box=True):
     """
     Shows Text on Window.
     bold = True -> Bold text
@@ -175,10 +177,32 @@ def load_text(text: str, color: tuple, x: int|float, y: int|float, bold: int=Tru
     (x, y) -> Coords to place text on
     color -> RGB value of color for the foreground of text
     text -> String
+    bg_color -> background box color
+    bg_alpha -> background box transparency measure(255 - opaque, 0 - tansparent)
+    padding -> Padding in box on x and y
     """
-    font = pygame.font.SysFont(None, size=size, italic=italic, bold=bold)
-    txt = font.render(text, True, color)
-    game_window.blit(txt, (x, y))
+    font = pygame.font.Font(resource_path("assets/PressStart2P-Regular.ttf"), size=size)
+    font.set_bold(bold)
+    font.set_italic(italic)
+    # txt = font.render(text, True, color)
+    text_surface = font.render(text, False, color)
+    if background_box:
+        text_rect = text_surface.get_rect(topleft=(x, y))
+
+        # background box based on length of text
+        box_width = text_rect.width + padding * 2
+        box_height = text_rect.height + padding * 2
+        box_surface = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
+        bg_color = (0,0,0)
+        
+        # box color = color + alpha
+        box_surface.fill((*bg_color, bg_alpha))
+
+        # box + text display
+        game_window.blit(box_surface, (x - padding, y - padding))
+
+    game_window.blit(text_surface, (x, y))
+
 
 def independendence_day_page():
     """An easter egg to celibrate Pakistan's Independence day on 14th August. (any year)"""
@@ -311,7 +335,7 @@ def menuscreen():
         # load_text("Hello "+username+"!".title(), blue, 510, 50, b=True)
         # load_text('Help him out!!!'.title(), yellow, 300, 260)
         # load_text('press the space bar to play :)', yellow, 250, 400, True)\
-        load_text(f'version: {GAME_VERSION[GAME_VERSION.index("v"):]}', yellow, 300, 500)
+        load_text(f'{GAME_VERSION[GAME_VERSION.index("v"):]}', (220, 220, 220), 833, 575, bold=False, size=15)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -448,20 +472,33 @@ def gameloop():
             game_window.blit(go, (0, 0))
             difficulty = "Easy" if apple_collrate == 16 else "Medium" if apple_collrate == 12 else "Hard" if apple_collrate == 8 else "Ultra-Hard" if apple_collrate == 4 else "not known"
             
-            load_text('           PRESS ENTER TO CONTINUE',
-                  red, 900/2-300, 600/2+115)
-            load_text(f'Highscore: {h_score}                                 Highest Appocity: {h_appocity}', blue, 50, 7,bold=False )
-            load_text('Go Again!', blue, 300+65, 500+68)
+            load_text('PRESS ENTER TO CONTINUE',
+                  red, 270, 218+6)
+            load_text(f'Highscore: {h_score}'
+                      , (0, 191, 255), 10, 7,bold=False )
+            load_text(f'Highest Appocity: {h_appocity}'
+                      , (0, 191, 255), 520, 7,bold=False )
             scr.append(score)
-            load_text(f'your score is : {score}, achieved in {time_taken_to_score} seconds'.capitalize()
-            ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+30, 600/2+100+30+20, bold = False)
-            load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if (appocity is not None and appocity <= 1) else "apples"}/second'.capitalize()
-            ,(yellow if (not testing_mode and not I_key_used) else orange), 900/2-300+50, 600/2+100+60+20, bold=False)
-            load_text(f'Difficulty: {difficulty}', color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow), x = 900/2-300+140, y = 600/2+100+90+20, bold = False)
+            load_text(f"Score: {score}",(yellow if (not testing_mode and not I_key_used) else orange), 
+                      365, 218+30+10, bold = False)
+            load_text(f"Time Taken: {time_taken_to_score}",(yellow if (not testing_mode and not I_key_used) else orange), 
+                      330, 218+60+10, bold = False)
+            # load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if (appocity is not None and appocity <= 1) else "apples"}/second'.capitalize()
+            # ,(yellow if (not testing_mode and not I_key_used) else orange), 
+            # 330, 218+90, bold=False)
+            load_text(f'Appocity: {appocity if appocity is not None else "None"} aps'.capitalize()
+            ,(yellow if (not testing_mode and not I_key_used) else orange), 
+            300, 218+90+10, bold=False)
+            load_text(f'Difficulty: {difficulty}', color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow)
+                      ,x = 310, y = 218+120+10, bold = False)
+            load_text('Go Again!', (0, 123, 255), 300+65, 218+150+10, size=20)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     quit_game = True
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        print(event.pos)
 
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_F1:
@@ -611,10 +648,6 @@ def gameloop():
                 food_y = random.randint(40, 400)
                 s_length += s_controler
 
-            load_text('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10)
-
-            # FPS indicator, green means constant frames and yellow means dynamic fps
-            load_text(str(fps), (yellow if Dynamic_FPS else green), (12+850 if len(str(fps)) < 3 else 12+837), 7)
 
             # Debug/Test Mode State Indication
             if testing_mode:
@@ -782,6 +815,10 @@ def gameloop():
 
             plot_snake(game_window, blue, s_lst, snake) # Draw the snake
 
+            load_text('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10)
+
+            # FPS indicator, green means constant frames and yellow means dynamic fps
+            load_text(str(fps), (yellow if Dynamic_FPS else green), (12+850 if len(str(fps)) < 3 else 12+837), 7)
 
             if pause_game:
                 time_paused += pause_window()
