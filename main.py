@@ -396,7 +396,8 @@ def gameloop():
     # timer = f"{}:{}:{time.time()-starting_time_for_timer}"
 
     time1 = None
-    test_mode_time_start = 0
+    testing_mode_time_start = 0
+    difficulty_mode_change_time_start = 0
     Dynamic_FPS_time_start = 0
     I_key_used = False
 
@@ -477,7 +478,7 @@ def gameloop():
             load_text(f'Highscore: {h_score}'
                       , (0, 191, 255), 10, 7,bold=False )
             load_text(f'Highest Appocity: {h_appocity}'
-                      , (0, 191, 255), 520, 7,bold=False )
+                      , (0, 191, 255), (520 if len(h_appocity) < 4 else 509), 7,bold=False )
             scr.append(score)
             load_text(f"Score: {score}",(yellow if (not testing_mode and not I_key_used) else orange), 
                       365, 218+30+10, bold = False)
@@ -560,7 +561,7 @@ def gameloop():
                     # Testing Mode: LCtrl + T
                     if event.key == pygame.K_t and pygame.key.get_mods() & pygame.KMOD_LCTRL:
                         testing_mode = not testing_mode
-                        test_mode_time_start = time.time()
+                        testing_mode_time_start = time.time()
                         print(testing_mode)
                     if event.key == pygame.K_F3:
                         Dynamic_FPS_time_start = time.time()
@@ -613,17 +614,21 @@ def gameloop():
                         else:
                             s_controler = 0 # Golden Dandelion which is a golden dandelion
                     elif event.key == pygame.K_e:
+                        difficulty_mode_change_time_start = time.time()
                         apple_collrate = 16
                         difficulty_velocity_change = 0
                     elif event.key == pygame.K_m:
+                        difficulty_mode_change_time_start = time.time()
                         apple_collrate = 12
                         s_controler = 4
                         difficulty_velocity_change = 0
                     elif event.key == pygame.K_h:
+                        difficulty_mode_change_time_start = time.time()
                         apple_collrate = 8
                         s_controler = 5
                         difficulty_velocity_change = round((BASE_VELOCITY)*(15/100))
                     elif event.key == pygame.K_u:
+                        difficulty_mode_change_time_start = time.time()
                         apple_collrate = 4
                         s_controler = 6
                         difficulty_velocity_change = round((BASE_VELOCITY)*(30/100))
@@ -648,14 +653,6 @@ def gameloop():
                 food_y = random.randint(40, 400)
                 s_length += s_controler
 
-
-            # Debug/Test Mode State Indication
-            if testing_mode:
-                if time.time()-test_mode_time_start < 0.5:
-                    load_text("Debug: Test Mode Enabled", green, 10, 575, bold = False)
-            else:
-                if time.time()-test_mode_time_start < 0.5:
-                    load_text("Debug: Test Mode Disabled", red, 10, 575, bold = False)
 
             # ctime = time.localtime()
             # ctime = time.strftime("%H-%M-%S")
@@ -734,13 +731,6 @@ def gameloop():
                     pygame.mixer.music.load(resource_path("assets/game_over_music.mp3"))
                     pygame.mixer.music.play(-1)
 
-            # Debug/Test Mode State Indication
-            if Dynamic_FPS:
-                if time.time()-Dynamic_FPS_time_start < 0.5:
-                    load_text("Debug: Dynamic FPS Enabled", green, 10, 575, bold = False)
-            else:
-                if time.time()-Dynamic_FPS_time_start < 0.5:
-                    load_text("Debug: Dynamic FPS Disabled", red, 10, 575, bold = False)
 
             # Dynamic FPS (v3.6+)
             if time.time()-time_before_game_loop >= 3 and Dynamic_FPS:
@@ -812,13 +802,34 @@ def gameloop():
             if velocity_y != 0:
                 velocity_y = init_velocity if velocity_y > 0 else -init_velocity
 
-
             plot_snake(game_window, blue, s_lst, snake) # Draw the snake
 
             load_text('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10)
 
             # FPS indicator, green means constant frames and yellow means dynamic fps
             load_text(str(fps), (yellow if Dynamic_FPS else green), (12+850 if len(str(fps)) < 3 else 12+837), 7)
+            
+            # Debug/Test Mode State Indication
+            if Dynamic_FPS:
+                if time.time()-Dynamic_FPS_time_start < 0.5:
+                    load_text("Debug: Dynamic FPS Enabled", green, 10, 575, bold = False)
+            else:
+                if time.time()-Dynamic_FPS_time_start < 0.5:
+                    load_text("Debug: Dynamic FPS Disabled", red, 10, 575, bold = False)
+
+            # Debug/Test Mode State Indication
+            if testing_mode:
+                if time.time()-testing_mode_time_start < 0.5:
+                    load_text("Debug: Test Mode Enabled", green, 10, 575, bold = False)
+            else:
+                if time.time()-testing_mode_time_start < 0.5:
+                    load_text("Debug: Test Mode Disabled", red, 10, 575, bold = False)
+
+            # Difficulty Mode State Indication
+            difficulty = "Easy" if apple_collrate == 16 else "Medium" if apple_collrate == 12 else "Hard" if apple_collrate == 8 else "Ultra-Hard" if apple_collrate == 4 else "not known"
+            color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow)
+            if time.time()-difficulty_mode_change_time_start < 1:
+                load_text(f"Set {username}'s Difficulty Mode to {difficulty}", color, 10, 575, bold = False)
 
             if pause_game:
                 time_paused += pause_window()
