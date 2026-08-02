@@ -75,6 +75,7 @@ Have any questions or issues with running the game, head to the discussions tab 
 © 2024–2026 HBCC1999. All rights reserved.
 Source code is made public for review and transparency purposes only.
 Redistribution, repackaging, or reverse engineering is not permitted.
+For the assets(images, audio etc.), checkout the ASSET_LICENSE File for more details.
 
 # Credits
 Developed by HBCC1999. Some of the game textures are made by the developer, while some are AI-generated. However the code is written completely by the developer. Audio by Youtube Studio.

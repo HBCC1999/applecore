@@ -1,8 +1,10 @@
 """Applecore (Standard) v3.7
+Copyright (c) 2024-2026 HBCC1999. All rights reserved.
+Licensed under the terms in LICENSE. Unauthorized redistribution prohibited.
 Developed by HBCC1999
 Textures: Some are made by the author and some are AI-generated.
 Audio: From Youtube Studio
-----------------------------------------------------------------
+----------------------------------------------------------------------------
 """
 # using pygame-ce instead of pygame because pygame-ce is more up to date and has more features than pygame
 import pygame
@@ -104,6 +106,7 @@ if os.path.exists(save_data_path("user_info.txt")):
     username = read_data("user_info.txt").split("\n")[0]
     if len(username) <3 or len(username) > 20:
         username = "Player" + str(random.randint(0, 50)) + str(random.randint(50, 100))
+        save_data(username, file_name="user_info.txt")
 else:
     username = "Player" + str(random.randint(0, 50)) + str(random.randint(50, 100))
     save_data(username, file_name="user_info.txt")
@@ -167,7 +170,7 @@ def usertext(event):
 # font
 # printing text on game
 def load_text(text: str, color: tuple, x: int|float, y: int|float,
-            bold: bool=False, italic: bool=False,size: int=16, padding=4, bg_color=(70,70,70),
+            bold: bool=False, italic: bool=False,size: int=16, padding=4, bg_color=(0,0,0),
             bg_alpha=128, background_box=True):
     """
     Shows Text on Window.
@@ -186,14 +189,14 @@ def load_text(text: str, color: tuple, x: int|float, y: int|float,
     font.set_italic(italic)
     # txt = font.render(text, True, color)
     text_surface = font.render(text, False, color)
-    if background_box:
+    if background_box and len(text) != 0:
         text_rect = text_surface.get_rect(topleft=(x, y))
 
         # background box based on length of text
         box_width = text_rect.width + padding * 2
         box_height = text_rect.height + padding * 2
         box_surface = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
-        bg_color = (0,0,0)
+        # bg_color = (0,0,0)
         
         # box color = color + alpha
         box_surface.fill((*bg_color, bg_alpha))
@@ -212,7 +215,7 @@ def independendence_day_page():
 
     while not quit_game:
         game_window.fill((220, 200, 240))
-        elapsed = time.time() - start_time
+        # elapsed = time.time() - start_time
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game = True
@@ -273,7 +276,7 @@ def settings_page():
     while not quit_game:
         game_window.fill((220, 200, 240))
         game_window.blit(setting_page, (0, 0))
-        load_text("  "+text_input, blue, 323, 127, bold=False)
+        load_text(text_input, (0, 50, 240), 352, 127, bold=False, bg_color = (20,200,90), bg_alpha=100)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game = True
