@@ -52,6 +52,7 @@ def read_data(file_name="highscores.txt"):
 GAME_VERSION = __doc__.split("\n")[0]
 print(__doc__, end="")
 
+version = GAME_VERSION[GAME_VERSION.index("v"):]
 snake = 30
 testing_mode = False
 I_key_used = False
@@ -189,6 +190,7 @@ def load_text(text: str, color: tuple, x: int|float, y: int|float,
     font.set_italic(italic)
     # txt = font.render(text, True, color)
     text_surface = font.render(text, False, color)
+
     if background_box and len(text) != 0:
         text_rect = text_surface.get_rect(topleft=(x, y))
 
@@ -205,6 +207,48 @@ def load_text(text: str, color: tuple, x: int|float, y: int|float,
         game_window.blit(box_surface, (x - padding, y - padding))
 
     game_window.blit(text_surface, (x, y))
+
+
+def text_dimensions(text: str, bold: bool=False, italic: bool=False, size: int=16, 
+                    padding=4, background_box=True):
+    """Values of the width and height of the overlay panel(background box) and the text itself, in pixels."""
+    
+    font = pygame.font.Font(resource_path("assets/PressStart2P-Regular.ttf"), size=size)
+    font.set_bold(bold)
+    font.set_italic(italic)
+    # txt = font.render(text, True, color)
+    text_width, text_height = font.size(text)
+
+    if background_box and len(text) != 0:
+        # background box based on length of text
+        box_width = text_width + padding * 2
+        box_height = text_height + padding * 2
+        return text_width, text_height, box_width, box_height
+    
+    return text_width, text_height, 0, 0
+
+
+def leftover_pixels(text: str, bold: bool=False, italic: bool=False, size: int=16,
+                     padding=4, background_box=True, side: str="x", leftover: int=10):
+    """Calculates the x or y coordinate so the text/box ends `leftover` 
+    pixels away from the edge of the screen, along the given axis."""
+    
+    if side not in ("x", "y"):
+        raise ValueError("side must be 'x' or 'y'")
+    
+    text_w, text_h, box_w, box_h = text_dimensions(
+        text, bold=bold, italic=italic, size=size, 
+        padding=padding, background_box=background_box
+    )
+    
+    size_to_use = box_w if background_box else text_w
+    screen_size = game_window.get_width()
+    
+    if side == "y":
+        size_to_use = box_h if background_box else text_h
+        screen_size = game_window.get_height()
+    
+    return screen_size - leftover - size_to_use
 
 
 def independendence_day_page():
@@ -284,7 +328,7 @@ def settings_page():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.mixer.stop()
-                    menuscreen()
+                    menu_screen()
                 elif event.key == pygame.K_RETURN:
                     # Save new username
                     if len(text_input) > 2 and len(text_input) <= 20:
@@ -308,7 +352,7 @@ def settings_page():
                         print('successful')
                     if m_p[0] > 810 and m_p[0] < 850 and m_p[1] > 27 and m_p[1] < 64:
                         pygame.mixer.music.stop()
-                        menuscreen()
+                        menu_screen()
 
         if time.time() - save_text_time < 1:
             load_text("Username saved successfully", x=20, y=570, color=green)
@@ -321,7 +365,7 @@ def settings_page():
         pygame.display.update()
         clock.tick(30)
 
-def menuscreen():
+def menu_screen():
     """Main menu screen, where the game starts and user can access settings or start the game."""
     global mute_music
     if not mute_music:
@@ -338,7 +382,8 @@ def menuscreen():
         # load_text("Hello "+username+"!".title(), blue, 510, 50, b=True)
         # load_text('Help him out!!!'.title(), yellow, 300, 260)
         # load_text('press the space bar to play :)', yellow, 250, 400, True)\
-        load_text(f'{GAME_VERSION[GAME_VERSION.index("v"):]}', (220, 220, 220), 833, 575, bold=False, size=15)
+        load_text(version, (220, 220, 190), leftover_pixels(version, leftover=3, size=13, bold=False), 583, bold=False, size=13)
+        load_text("Copyright HBCC1999. All rights reserved.", (220, 220, 190), 8, 583, bold=False, size=12)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -481,7 +526,7 @@ def gameloop():
             load_text(f'Highscore: {h_score}'
                       , (0, 191, 255), 10, 7,bold=False )
             load_text(f'Highest Appocity: {h_appocity}'
-                      , (0, 191, 255), (520 if len(h_appocity) < 4 else 509), 7,bold=False )
+                      , (0, 191, 255), leftover_pixels(f'Highest Appocity: {h_appocity}', bold=False, size=16, padding=4, background_box=True, side="x", leftover=5), 7,bold=False )
             scr.append(score)
             load_text(f"Score: {score}",(yellow if (not testing_mode and not I_key_used) else orange), 
                       365, 218+30+10, bold = False)
@@ -523,7 +568,7 @@ def gameloop():
                         gameloop()
                     elif event.key == pygame.K_HOME:
                         scr.clear()
-                        menuscreen()
+                        menu_screen()
 
         else:
             # Main Game
@@ -810,7 +855,7 @@ def gameloop():
             load_text('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10)
 
             # FPS indicator, green means constant frames and yellow means dynamic fps
-            load_text(str(fps), (yellow if Dynamic_FPS else green), (12+850 if len(str(fps)) < 3 else 12+837), 7)
+            load_text(str(fps), (yellow if Dynamic_FPS else green), leftover_pixels(str(fps), leftover=3), 7)
             
             # Debug/Test Mode State Indication
             if Dynamic_FPS:
@@ -845,7 +890,7 @@ def gameloop():
 
 def main():
     """Main Function, where the whole game comes up together!"""
-    menuscreen()
+    menu_screen()
 
 if __name__ == '__main__':
     main()
