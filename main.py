@@ -59,14 +59,20 @@ I_key_used = False
 DEFAULT_FPS = 60
 scr = []
 today_date = datetime.date.today()
-is_independence_day = (today_date.month == 8 and today_date.day == 14)
+# is_independence_day = (today_date.month == 8 and today_date.day == 14)
+game_window = pygame.display.set_mode((900, 600))
+is_independence_day = (today_date.month == 8) # Applies for the whole month of August.
+if is_independence_day:
+    # august_background = pygame.image.load(resource_path("assets/august_background.jpg"))
+    # august_background = pygame.transform.scale(august_background, (900, 600)).convert_alpha()
+    green_apple = pygame.image.load(resource_path("assets/green_apple.png")).convert_alpha()
+    green_apple = pygame.transform.scale(green_apple, (snake, snake))
 mute_music = False
 target_fps = DEFAULT_FPS
 optimization_constant = 2.8 #This is a constant that is based of to calculate optimization index in gameloop its value is based of 70/25, where 25 is optimization index
 # that implies that the system is optimized enough to run the game at 70% of display refresh rate and this is the highest in the middle tier fps
 
 # display
-game_window = pygame.display.set_mode((900, 600))
 BASE_VELOCITY = 384 # (8 * fps:=48) pixels per second, regardless of the frames
 icon = pygame.image.load(resource_path('assets/appicon.png'))
 icon = pygame.transform.scale(icon, (32, 32)).convert_alpha()
@@ -76,10 +82,11 @@ myimg = pygame.image.load(resource_path('assets/menu_screen_image.jpg'))
 myimg = pygame.transform.scale(myimg, (900, 600)).convert_alpha()
 go = pygame.image.load(resource_path('assets/game_over_screen.jpg'))
 go = pygame.transform.scale(go, (900, 600)).convert_alpha()
-bk = pygame.image.load(resource_path('assets/background_image.jpg'))
-bk = pygame.transform.scale(bk, (900, 600)).convert_alpha()
-apl = pygame.image.load(resource_path('assets/apple.png'))
-apl = pygame.transform.scale(apl, (snake, snake)).convert_alpha()
+default_background_image = pygame.image.load(resource_path('assets/background_image.jpg'))
+default_background_image = pygame.transform.scale(default_background_image, (900, 600)).convert_alpha()
+background_image = default_background_image
+red_apple = pygame.image.load(resource_path('assets/apple.png'))
+red_apple = pygame.transform.scale(red_apple, (snake, snake)).convert_alpha()
 # s_i = pygame.image.load(resource_path('assets/sicon.png'))
 # si = pygame.transform.scale(s_i, (43, 43)).convert_alpha()
 setting_page = pygame.image.load(resource_path('assets/settings_page_image.png'))
@@ -437,6 +444,7 @@ def gameloop():
     global time_taken_to_score
     global testing_mode
     global I_key_used
+    global background_image
 
     # ctime = time.localtime()
     # ctime = time.strftime("%H-%M-%S")
@@ -682,7 +690,7 @@ def gameloop():
                         difficulty_velocity_change = round((BASE_VELOCITY)*(30/100))
 
             game_window.fill(white)
-            game_window.blit(bk, (0, 0))
+            game_window.blit(background_image, (0, 0))
 
             if (velocity_x != 0 or velocity_y !=0) and time1 is None:
                 time1 = time.time()
@@ -700,6 +708,7 @@ def gameloop():
                 food_x = random.randint(40, 600)
                 food_y = random.randint(40, 400)
                 s_length += s_controler
+                show_green_apple = random.choice([False, True])
 
 
             # ctime = time.localtime()
@@ -750,23 +759,27 @@ def gameloop():
                     pygame.mixer.music.load(resource_path("assets/game_over_music.mp3"))
                     pygame.mixer.music.play(-1)
 
-            game_window.blit(apl, (food_x, food_y))
+            game_window.blit(red_apple, (food_x, food_y)) if not show_green_apple else None
 
 
-            if is_independence_day:
+            if is_independence_day and show_green_apple:
                 # 20% chance for the green apple to appear(only on 14 August)
-                if show_green_apple:
-                    pygame.draw.rect(game_window, (0, 130, 0),
-                    pygame.Rect(green_food_x,green_food_y,snake,snake))
-                    if abs(snake_x-green_food_x) < apple_collrate and abs(snake_y-green_food_y) < apple_collrate:
-                        green_food_x = random.randint(20, 900)
-                        green_food_y = random.randint(30, 525)
-                        score += 30
-                        pygame.mixer.music.stop()
-                        if independendence_day_page():
-                            break
-                        else:
-                            pygame.event.clear()
+                # background_image = august_background
+                # pygame.draw.rect(game_window, (0, 130, 0),
+                # pygame.Rect(green_food_x,green_food_y,snake,snake))
+                game_window.blit(green_apple, (green_food_x, green_food_y))
+                if abs(snake_x-green_food_x) < apple_collrate and abs(snake_y-green_food_y) < apple_collrate:
+                    green_food_x = random.randint(20, 900)
+                    green_food_y = random.randint(30, 525)
+                    score += 30
+                    show_green_apple = random.choice([False, True])
+                    # pygame.mixer.music.stop()
+                    # if independendence_day_page():
+                    #     break
+                    # else:
+                    #     pygame.event.clear()
+            else:
+                background_image = default_background_image
 
             if snake_x < 0 or snake_x > 900 or snake_y < 0 or snake_y > 600:
                 game_over = True
