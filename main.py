@@ -177,8 +177,23 @@ def usertext(event):
         text_input+=event.unicode
         print(text_input)
 
+
 # font
 # printing text on game
+_font_cache = {}
+def get_font(size, italic, bold):
+    """Returns specified font from _font_cache, thus preventing unnecessary IO calls for same key"""
+    key = (size, italic, bold)
+    if key not in _font_cache:
+        font = pygame.font.Font("assets/PressStart2P-Regular.ttf", size=size)
+        font.set_bold(bold)
+        font.set_italic(italic)
+        _font_cache[key] = font
+        print(f"Debug: Loaded font for {key=}")
+
+    return _font_cache[key]
+
+
 def load_text(text: str, color: tuple, x: int|float, y: int|float,
             bold: bool=False, italic: bool=False,size: int=16, padding=4, bg_color=(0,0,0),
             bg_alpha=128, background_box=True):
@@ -194,9 +209,8 @@ def load_text(text: str, color: tuple, x: int|float, y: int|float,
     bg_alpha -> background box transparency measure(255 - opaque, 0 - tansparent)
     padding -> Padding in box on x and y
     """
-    font = pygame.font.Font(resource_path("assets/PressStart2P-Regular.ttf"), size=size)
-    font.set_bold(bold)
-    font.set_italic(italic)
+    font = get_font(size, italic, bold)
+
     # txt = font.render(text, True, color)
     text_surface = font.render(text, False, color)
 
@@ -222,9 +236,7 @@ def text_dimensions(text: str, bold: bool=False, italic: bool=False, size: int=1
                     padding=4, background_box=True):
     """Values of the width and height of the overlay panel(background box) and the text itself, in pixels."""
     
-    font = pygame.font.Font(resource_path("assets/PressStart2P-Regular.ttf"), size=size)
-    font.set_bold(bold)
-    font.set_italic(italic)
+    font = get_font(size, italic, bold)
     # txt = font.render(text, True, color)
     text_width, text_height = font.size(text)
 
@@ -288,6 +300,7 @@ def independendence_day_page():
         pygame.display.update()
         clock.tick(30)
 
+
 def pause_window():
     """Pauses the game after esc key is pressed, in this state, snake attributes 
     can't be changed and time spent in this state is not accounted for in time_taken_to_score.
@@ -316,6 +329,7 @@ def pause_window():
                 
         pygame.display.update()
         clock.tick(30)
+
 
 def settings_page():
     """Settings page, coming soon!"""
@@ -373,6 +387,7 @@ def settings_page():
 
         pygame.display.update()
         clock.tick(30)
+
 
 def menu_screen():
     """Main menu screen, where the game starts and user can access settings or start the game."""
@@ -432,6 +447,7 @@ def menu_screen():
         # load_text('Pyth0n wants to eat some apples...'.title(), blue, 200, 150)
         pygame.display.update()
         clock.tick(30)
+
 
 # Main game loop / In-game loop
 def gameloop():
@@ -581,6 +597,7 @@ def gameloop():
                     elif event.key == pygame.K_HOME:
                         scr.clear()
                         menu_screen()
+
 
         else:
             # Main Game
