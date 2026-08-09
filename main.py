@@ -1,4 +1,4 @@
-"""Applecore (Standard) v3.7
+"""Applecore (Standard) v3.8-alpha.1-dev
 Copyright (c) 2024-2026 HBCC1999. All rights reserved.
 Licensed under the terms in LICENSE. Unauthorized redistribution prohibited.
 Developed by HBCC1999
