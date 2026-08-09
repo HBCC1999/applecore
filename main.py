@@ -59,14 +59,16 @@ I_key_used = False
 DEFAULT_FPS = 60
 scr = []
 today_date = datetime.date.today()
-# is_independence_day = (today_date.month == 8 and today_date.day == 14)
+# is_independence_month = (today_date.month == 8 and today_date.day == 14)
 game_window = pygame.display.set_mode((900, 600))
-is_independence_day = (today_date.month == 8) # Applies for the whole month of August.
-if is_independence_day:
+is_independence_month = (today_date.month == 8) # Applies for the whole month of August.
+if is_independence_month:
     # august_background = pygame.image.load(resource_path("assets/august_background.jpg"))
     # august_background = pygame.transform.scale(august_background, (900, 600)).convert_alpha()
     green_apple = pygame.image.load(resource_path("assets/green_apple.png")).convert_alpha()
     green_apple = pygame.transform.scale(green_apple, (snake, snake))
+else:
+    green_apple = None
 mute_music = False
 target_fps = DEFAULT_FPS
 optimization_constant = 2.8 #This is a constant that is based of to calculate optimization index in gameloop its value is based of 70/25, where 25 is optimization index
@@ -454,6 +456,7 @@ def gameloop():
     time1 = None
     testing_mode_time_start = 0
     difficulty_mode_change_time_start = 0
+    independence_month_toggle_time_start = 0
     Dynamic_FPS_time_start = 0
     I_key_used = False
 
@@ -478,8 +481,8 @@ def gameloop():
     difficulty_velocity_change = 0
     food_x = random.randint(40, 800)
     food_y = random.randint(50, 500)
-    green_food_x= random.randint(20,900)
-    green_food_y= random.randint(30,525)
+    green_food_x= random.randint(40, 840)
+    green_food_y= random.randint(25,550)
     snake_x = random.randint(350,520)
     snake_y = random.randint(200,400)
 
@@ -527,8 +530,9 @@ def gameloop():
             show_green_apple = random.choice([False, False, False, False, True])
             game_window.fill(white)
             game_window.blit(go, (0, 0))
+            plot_snake(game_window, (blue[0]+80, blue[1], blue[2]-100), s_lst, snake) # Snake frozen in time after death.
             difficulty = "Easy" if apple_collrate == 16 else "Medium" if apple_collrate == 12 else "Hard" if apple_collrate == 8 else "Ultra-Hard" if apple_collrate == 4 else "not known"
-            
+
             load_text('PRESS ENTER TO CONTINUE',
                   red, 270, 218+6)
             load_text(f'Highscore: {h_score}'
@@ -602,6 +606,10 @@ def gameloop():
 
                     quit_game = True
 
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        print("[Main Game]",event.pos)
+
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         pause_game = not pause_game
@@ -619,6 +627,18 @@ def gameloop():
                         testing_mode = not testing_mode
                         testing_mode_time_start = time.time()
                         print(testing_mode)
+                    #  Toggle Independence Month State, to access green apple
+                    if testing_mode and event.key == pygame.K_p and pygame.key.get_mods() & pygame.KMOD_LCTRL:
+                        global is_independence_month
+                        global green_apple
+                        is_independence_month = not is_independence_month
+                        independence_month_toggle_time_start = time.time()
+                        # if is_independence_month and show_green_apple:
+                        #     show_green_apple = False
+                        if is_independence_month and green_apple is None:
+                            green_apple = pygame.image.load(resource_path("assets/green_apple.png")).convert_alpha()
+                            green_apple = pygame.transform.scale(green_apple, (snake, snake))
+                            print("Loaded Green Apple")
                     if event.key == pygame.K_F3:
                         Dynamic_FPS_time_start = time.time()
                         Dynamic_FPS = not Dynamic_FPS
@@ -705,10 +725,29 @@ def gameloop():
             if abs(snake_x-food_x) < apple_collrate and abs(snake_y-food_y) < apple_collrate:
                 score += 10
                 # print(s_lst)
-                food_x = random.randint(40, 600)
-                food_y = random.randint(40, 400)
+                food_x = random.randint(40, 840)
+                food_y = random.randint(25, 550)
                 s_length += s_controler
-                show_green_apple = random.choice([False, True])
+                show_green_apple = random.choice([False, True]) if is_independence_month else False
+
+            elif is_independence_month and show_green_apple:
+                # 20% chance for the green apple to appear(only on 14 August)
+                # background_image = august_background
+                # pygame.draw.rect(game_window, (0, 130, 0),
+                # pygame.Rect(green_food_x,green_food_y,snake,snake))
+                game_window.blit(green_apple, (green_food_x, green_food_y))
+
+                if abs(snake_x-green_food_x) < apple_collrate and abs(snake_y-green_food_y) < apple_collrate:
+                    green_food_x = random.randint(40, 840)
+                    green_food_y = random.randint(25, 550)
+                    score += 30
+                    s_length += s_controler
+                    show_green_apple = random.choice([False, True])
+                    # pygame.mixer.music.stop()
+                    # if independendence_day_page():
+                    #     break
+                    # else:
+                    #     pygame.event.clear()
 
 
             # ctime = time.localtime()
@@ -759,29 +798,10 @@ def gameloop():
                     pygame.mixer.music.load(resource_path("assets/game_over_music.mp3"))
                     pygame.mixer.music.play(-1)
 
-            game_window.blit(red_apple, (food_x, food_y)) if not show_green_apple else None
+            game_window.blit(red_apple, (food_x, food_y)) if not (is_independence_month and show_green_apple) else None
 
 
-            if is_independence_day and show_green_apple:
-                # 20% chance for the green apple to appear(only on 14 August)
-                # background_image = august_background
-                # pygame.draw.rect(game_window, (0, 130, 0),
-                # pygame.Rect(green_food_x,green_food_y,snake,snake))
-                game_window.blit(green_apple, (green_food_x, green_food_y))
-                if abs(snake_x-green_food_x) < apple_collrate and abs(snake_y-green_food_y) < apple_collrate:
-                    green_food_x = random.randint(20, 900)
-                    green_food_y = random.randint(30, 525)
-                    score += 30
-                    show_green_apple = random.choice([False, True])
-                    # pygame.mixer.music.stop()
-                    # if independendence_day_page():
-                    #     break
-                    # else:
-                    #     pygame.event.clear()
-            else:
-                background_image = default_background_image
-
-            if snake_x < 0 or snake_x > 900 or snake_y < 0 or snake_y > 600:
+            if snake_x <= 0 or snake_x + snake > 900 or snake_y <= 0 or snake_y + snake > 600:
                 game_over = True
                 if time1 is not None:
                     time_taken_to_score = round(time.time() - time1 - time_paused, 2)
@@ -820,6 +840,7 @@ def gameloop():
                         
                 elif (optimization_index != 0 and optimization_index < 25 and optimization_index >= 12) and battery_unused>=25:
                     target_fps = 48 # mid-tear fps
+
                 else:
                     # fps = 20
                     target_fps = 20 # lowest fps
@@ -891,6 +912,8 @@ def gameloop():
             color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow)
             if time.time()-difficulty_mode_change_time_start < 1:
                 load_text(f"Set {username}'s Difficulty Mode to {difficulty}", color, 10, 575, bold = False)
+            if time.time()-independence_month_toggle_time_start < 1:
+                load_text(f"Debug: Independence Month State is set to {is_independence_month}", color, 10, 575, bold = False)
 
             if pause_game:
                 time_paused += pause_window()
