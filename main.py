@@ -185,7 +185,7 @@ def get_font(size, italic, bold):
     """Returns specified font from _font_cache, thus preventing unnecessary IO calls for same key"""
     key = (size, italic, bold)
     if key not in _font_cache:
-        font = pygame.font.Font("assets/PressStart2P-Regular.ttf", size=size)
+        font = pygame.font.Font(resource_path("assets/PressStart2P-Regular.ttf"), size=size)
         font.set_bold(bold)
         font.set_italic(italic)
         _font_cache[key] = font
@@ -501,6 +501,7 @@ def gameloop():
     green_food_y= random.randint(25,550)
     snake_x = random.randint(350,520)
     snake_y = random.randint(200,400)
+    death_frame = False
 
     velocity_x = 0
     velocity_y = 0
@@ -522,31 +523,32 @@ def gameloop():
     
         if game_over:
             fps = 30
-            appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
-            
-            # Checking if the current appocity is greater than the highest appocity and updating it if necessary
-            if appocity is not None and (appocity) > float(h_appocity) and not testing_mode and not I_key_used:
-                h_appocity = str(appocity)
-                in_game_info[1] = str(appocity)
-            
-            # Checking if the current score is greater than the highscore and updating it if necessary
-            if score > int(h_score) and not testing_mode and not I_key_used:
-                h_score = str(score)
-                in_game_info[0] = str(score)
-            
-            if in_game_info[2] != str(Dynamic_FPS):
-                in_game_info[2] = str(Dynamic_FPS)
+            if death_frame:
+                death_frame = False
+                appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
+                
+                # Checking if the current appocity is greater than the highest appocity and updating it if necessary
+                if appocity is not None and (appocity) > float(h_appocity) and not testing_mode and not I_key_used:
+                    h_appocity = str(appocity)
+                    in_game_info[1] = str(appocity)
+                
+                # Checking if the current score is greater than the highscore and updating it if necessary
+                if score > int(h_score) and not testing_mode and not I_key_used:
+                    h_score = str(score)
+                    in_game_info[0] = str(score)
+                
+                if in_game_info[2] != str(Dynamic_FPS):
+                    in_game_info[2] = str(Dynamic_FPS)
 
-            save_data("\n".join(in_game_info))
+                save_data("\n".join(in_game_info))
 
-            # with open(resource_path("highscores.txt")) as i:
-            #     h_appocity = int(i.read()[i.read().index("\n")+1:])
-            # print(h_appocity)
+                show_green_apple = random.choice([False, False, False, False, True])
 
-            show_green_apple = random.choice([False, False, False, False, True])
             game_window.fill(white)
             game_window.blit(go, (0, 0))
+
             plot_snake(game_window, (blue[0]+80, blue[1], blue[2]-100), s_lst, snake) # Snake frozen in time after death.
+            # game_window.blit(red_apple, (food_x, food_y)) if testing_mode else None
             difficulty = "Easy" if apple_collrate == 16 else "Medium" if apple_collrate == 12 else "Hard" if apple_collrate == 8 else "Ultra-Hard" if apple_collrate == 4 else "not known"
 
             load_text('PRESS ENTER TO CONTINUE',
@@ -609,7 +611,7 @@ def gameloop():
                     if appocity is not None and (appocity) > float(h_appocity):
                         h_appocity = str(appocity)
                         in_game_info[1] = str(appocity)
-                    print(time_taken_to_score, appocity, h_appocity)
+                    # print(time_taken_to_score, appocity, h_appocity)
                     
                     # Checking if the current score is greater than the highscore and updating it if necessary
                     if score > int(h_score):
@@ -643,7 +645,7 @@ def gameloop():
                     if event.key == pygame.K_t and pygame.key.get_mods() & pygame.KMOD_LCTRL:
                         testing_mode = not testing_mode
                         testing_mode_time_start = time.time()
-                        print(testing_mode)
+                        # print(testing_mode)
                     #  Toggle Independence Month State, to access green apple
                     if testing_mode and event.key == pygame.K_p and pygame.key.get_mods() & pygame.KMOD_LCTRL:
                         global is_independence_month
@@ -692,6 +694,7 @@ def gameloop():
                         #     init_velocity_change = 0
                     elif event.key == pygame.K_o:
                         game_over = True
+                        death_frame = True
                         if time1 is not None:
                             time_taken_to_score = round(time.time() - time1 - time_paused, 2)
                         else:
@@ -806,6 +809,7 @@ def gameloop():
 
             if self_collision:
                 game_over = True
+                death_frame = True
                 if time1 is not None:
                     time_taken_to_score = round(time.time() - time1 - time_paused, 2)
                 else:
@@ -820,6 +824,7 @@ def gameloop():
 
             if snake_x <= 0 or snake_x + snake > 900 or snake_y <= 0 or snake_y + snake > 600:
                 game_over = True
+                death_frame = True
                 if time1 is not None:
                     time_taken_to_score = round(time.time() - time1 - time_paused, 2)
                 else:
