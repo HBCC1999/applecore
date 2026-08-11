@@ -26,7 +26,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='Applecore_v3.7',
+    name='Applecore_v3.8-alpha.1',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

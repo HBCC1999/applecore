@@ -1,4 +1,4 @@
-"""Applecore (Standard) v3.8-alpha.1-dev
+"""Applecore (Standard) v3.8-alpha.1
 Copyright (c) 2024-2026 HBCC1999. All rights reserved.
 Licensed under the terms in LICENSE. Unauthorized redistribution prohibited.
 Developed by HBCC1999
@@ -770,9 +770,6 @@ def gameloop():
                     #     pygame.event.clear()
 
 
-            # ctime = time.localtime()
-            # ctime = time.strftime("%H-%M-%S")
-
             # New Snake rendering system(v3.7+)
             step_dist = abs(velocity_x_f) + abs(velocity_y_f)
             distance_since_last_segment += step_dist
@@ -932,8 +929,10 @@ def gameloop():
             # Difficulty Mode State Indication
             difficulty = "Easy" if apple_collrate == 16 else "Medium" if apple_collrate == 12 else "Hard" if apple_collrate == 8 else "Ultra-Hard" if apple_collrate == 4 else "not known"
             color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow)
+
             if time.time()-difficulty_mode_change_time_start < 1:
                 load_text(f"Set {username}'s Difficulty Mode to {difficulty}", color, 10, 575, bold = False)
+
             if time.time()-independence_month_toggle_time_start < 1:
                 load_text(f"Debug: Independence Month State is set to {is_independence_month}", color, 10, 575, bold = False)
 
@@ -945,6 +944,7 @@ def gameloop():
 
     pygame.quit()
     sys.exit()
+
 
 def main():
     """Main Function, where the whole game comes up together!"""
