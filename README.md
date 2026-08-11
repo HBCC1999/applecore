@@ -87,7 +87,7 @@ For the assets(images, audio etc.), checkout the ASSET_LICENSE File for more det
 Developed by HBCC1999. Some of the game textures are made by the developer, while some are AI-generated. However the code is written completely by the developer. Audio by Youtube Studio.
 
 # Screenshots
-<img width="1418" height="752" alt="images" src="https://github.com/user-attachments/assets/8dc87b94-38ef-4d12-9dfd-6f770079a8ad" />
-<img width="1355" height="938" alt="Screenshot (97)" src="https://github.com/user-attachments/assets/fc175a4d-301a-4eb2-bf0c-25ef48eafe8a" />
-<img width="1347" height="941" alt="Screenshot (98)" src="https://github.com/user-attachments/assets/c310affe-db7d-479d-b4a0-f79a449621cb" />
-<img width="668" height="444" alt="Screenshot 2026-06-11 114629" src="https://github.com/user-attachments/assets/f42b19d2-14f1-40fe-8a93-aafc1633c41f" />
+<img width="500" height="300" alt="Screenshot 2026-08-11 162605" src="https://github.com/user-attachments/assets/4451c2e3-30e6-4075-87a8-5e9074d45a77" />
+<img width="500" height="300" alt="Screenshot 2026-08-11 162728" src="https://github.com/user-attachments/assets/944ec3e1-7465-414d-92a8-4dd637451427" />
+<img width="500" height="300" alt="Screenshot 2026-08-11 162858" src="https://github.com/user-attachments/assets/089e7f41-9d50-4246-9cc3-0a3a6f766268" />
+<img width="500" height="300" alt="Screenshot 2026-08-11 162922" src="https://github.com/user-attachments/assets/affbfc9c-f3f8-457f-a4d9-1ccaf1eea085" />
