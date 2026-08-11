@@ -17,6 +17,7 @@ Applecore is an over-engineered, 2D voxel style game, where you devour apples fo
 | `F3` | Toggle dynamic FPS | FPS indicator turns yellow when active. v3.6+ |
 | `I (Only Testing Purposes)` | Increase score without eating, but doesn't contribute to highscore or highest appocity (v3.7+) | Testing/experimental only, Can be activated only after toggling testing_mode|
 | `LCtrl + T (v3.7+)` | Toggle testing_mode | Only for debugging purposes, off by default|
+| `LCtrl + P (v3.8+)` | Toggle independence month (special feature) | (Experimental use) Toggles independence_month which is only enabled in month of August. (Detail below)|
 
 # Features
 You can use f1 key to mute the background music of Applecore.
@@ -29,6 +30,8 @@ You can press O key to instantly kill the snake, instead of waiting for it to hi
 You can control snake's growth factor with Z and X key. X key increases it and Z key decreases it, growth factor is applied after you eat an apple.
 From Applecore 3.6 onwards, you can press f3 key to turn on dynamic fps, which maps your fps according to utilization of computer resources and battery life. Recommended for all devices, especially low-end computers. When dynamic fps is turned on, the fps indicator will turn from green to yellow(present on the top-right corner), where you can see your current fps.
 You can also return to home page directly from the game over screen by pressing the HOME key.
+Independence month enabled causes a green apple to spawn instead of classic red apple, which gives 3x score compared to red apple. It has 20% chance to spawn at start of game and 50% after you eat first apple. This feature only works in the month of August (any year). This exotic feature is introduced as tribute to August 14th, a memorable day in history of Pakistan. (Applecore v3.8+)
+You can veiw snake's last position in game over screen. (Applecore v3.8+)
 
 # Cross-Platform
 Applecore is expected to work on Windows 10 and 11 without any issues. The code might run on windows 7 but the python interpretor used (3.11) doesnt support Windows 7. I might release a backport edition for windows 7, if you guys want. Linux and mac support the code, but I only release exe files for now, which run on windows machine only. Android is not supported.
@@ -36,19 +39,22 @@ Applecore is expected to work on Windows 10 and 11 without any issues. The code 
 # System Requirements
 Works best on Win 11 or 10. Should work on Win 7, though not the executable because it bundles Python 3.11, where as win 7 works best up till Python 3.7. Linux and mac don't support exe files. Applecore is really light-weight and can run on any system, including low-end pcs, desktops, laptops etc, anything that has windows.
 
-# Issues
-All major issues with the game have been fixed (v3.7+). So as of now, there are no noticeable bugs. If you do find, do inform us.
+# Known Issues
+The game uses the same loop (game_loop) for game_over screen and main-game, for easy access to local variables. However, if player wants to restart game from game over screen, the game uses recursion to call game_loop again. By default, Python has a recursion limit, which means after 1000 runs, the game will crash. Now this is unlikely for most players and is expected to be fixed. You can restart the game to reset limit to 1000 runs again.
+If you find any bugs or issues, do inform.
 
 # History
-First version was 1.0. Though it is not available now.
-Applecore 2.0 was subsequently released within a week of 1.0
-Applecore 3.0 added some cool features, fixed previous bugs, and added new keybinds.
-Version 1.3.4 added appocity and related features.
-The texture update (v1.3.5) changed the game's textures.
-The optimization update (v3.6) added dynamic FPS along with other features. Released in April.
-Delta-Time Motion (v3.7-alpha.1) added time-based motion and replaced the game's motion and self-collision logic.
-Immersive Motion and Bug Fixes (v3.7-beta.1) added pixel-based motion logic to remaining parts of game, and major bugs were fixed.
-Motion and Rendering Overhaul (v3.7) acknowledged all the changes from alpha and beta builds, and fixed games data storage while enhancing visual rendering of the game.
+- First version was 1.0. Though it is not available now.
+- Applecore 2.0 was subsequently released within a week of 1.0
+- Applecore 3.0 added some cool features, fixed previous bugs, and added new key-binds.
+- Version 1.3.4 added appocity and related features.
+- The texture update (v1.3.5) changed the game's textures.
+- Dynamic FPS (v1.3.6) added dynamic FPS feature.
+- The optimization update (v3.6) completed everything fundamental about dynamic FPS along with other features. Released in April.
+- Delta-Time Motion (v3.7-alpha.1) added time-based motion and replaced the game's motion and self-collision logic.
+- Immersive Motion and Bug Fixes (v3.7-beta.1) added pixel-based motion logic to remaining parts of game, and major bugs were fixed.
+- Motion and Rendering Overhaul (v3.7) acknowledged all the changes from alpha and beta builds, and fixed games data storage while enhancing visual rendering of the game.
+- August Augmented (v3.8-alpha.1) added feature-complete Independence Month easter egg, along with a custom font for the game, updated textures, bug fixes, performance improvements, other minor features and documentation improvements.
 
 Note: For more details on these versions, go to the releases page.
 
