@@ -1,9 +1,10 @@
-"""Applecore (Standard) v3.8-alpha.1
+"""Applecore (Standard) v3.8-beta.1-dev
 Copyright (c) 2024-2026 HBCC1999. All rights reserved.
 Licensed under the terms in LICENSE. Unauthorized redistribution prohibited.
 Developed by HBCC1999
 Textures: Some are made by the author and some are AI-generated.
 Audio: From Youtube Studio
+Font by: Codeman38
 ----------------------------------------------------------------------------
 """
 # using pygame-ce instead of pygame because pygame-ce is more up to date and has more features than pygame
@@ -55,7 +56,7 @@ print(__doc__, end="")
 version = GAME_VERSION[GAME_VERSION.index("v"):]
 snake = 30
 testing_mode = False
-I_key_used = False
+debug_activated = False
 DEFAULT_FPS = 60
 scr = []
 today_date = datetime.date.today()
@@ -130,6 +131,8 @@ gamefilecontent = ""
 if os.path.exists(save_data_path('highscores.txt')):
     gamefilecontent = read_data("highscores.txt")
 in_game_info = gamefilecontent.split("\n")
+debug_mode = ((not len(in_game_info)<4) and in_game_info[3] == "True")
+print(f"Debug: Debug mode set to {debug_mode}")
 
 first_line_of_file = gamefilecontent.split("\n")[0] if gamefilecontent else ""
 
@@ -137,7 +140,7 @@ try:
     should_reset_gamefilecontent = (
         not first_line_of_file.isdigit() or
         not in_game_info[1].replace('.', '', 1).isdigit() or
-        len(in_game_info)>3 or
+        len(in_game_info)>10 or
         in_game_info[2] not in ('True', 'False')
     )
 except IndexError:
@@ -461,7 +464,7 @@ def gameloop():
     global Dynamic_FPS
     global time_taken_to_score
     global testing_mode
-    global I_key_used
+    global debug_activated
     global background_image
 
     # ctime = time.localtime()
@@ -474,7 +477,8 @@ def gameloop():
     difficulty_mode_change_time_start = 0
     independence_month_toggle_time_start = 0
     Dynamic_FPS_time_start = 0
-    I_key_used = False
+    debug_activated = False
+    debug_score = False
 
     snake = 30
     apple_collrate = 12
@@ -528,12 +532,12 @@ def gameloop():
                 appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
                 
                 # Checking if the current appocity is greater than the highest appocity and updating it if necessary
-                if appocity is not None and (appocity) > float(h_appocity) and not testing_mode and not I_key_used:
+                if appocity is not None and (appocity) > float(h_appocity) and not testing_mode and not debug_activated:
                     h_appocity = str(appocity)
                     in_game_info[1] = str(appocity)
                 
                 # Checking if the current score is greater than the highscore and updating it if necessary
-                if score > int(h_score) and not testing_mode and not I_key_used:
+                if score > int(h_score) and not testing_mode and not debug_activated:
                     h_score = str(score)
                     in_game_info[0] = str(score)
                 
@@ -558,15 +562,15 @@ def gameloop():
             load_text(f'Highest Appocity: {h_appocity}'
                       , (0, 191, 255), leftover_pixels(f'Highest Appocity: {h_appocity}', bold=False, size=16, padding=4, background_box=True, side="x", leftover=5), 7,bold=False )
             scr.append(score)
-            load_text(f"Score: {score}",(yellow if (not testing_mode and not I_key_used) else orange), 
+            load_text(f"Score: {score}",(yellow if (not testing_mode and not debug_activated) else orange), 
                       365, 218+30+10, bold = False)
-            load_text(f"Time Taken: {time_taken_to_score}",(yellow if (not testing_mode and not I_key_used) else orange), 
+            load_text(f"Time Taken: {time_taken_to_score}",(yellow if (not testing_mode and not debug_activated) else orange), 
                       330, 218+60+10, bold = False)
             # load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if (appocity is not None and appocity <= 1) else "apples"}/second'.capitalize()
-            # ,(yellow if (not testing_mode and not I_key_used) else orange), 
+            # ,(yellow if (not testing_mode and not debug_activated) else orange), 
             # 330, 218+90, bold=False)
             load_text(f'Appocity: {appocity if appocity is not None else "None"} aps'.capitalize()
-            ,(yellow if (not testing_mode and not I_key_used) else orange), 
+            ,(yellow if (not testing_mode and not debug_activated) else orange), 
             300, 218+90+10, bold=False)
             load_text(f'Difficulty: {difficulty}', color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow)
                       ,x = 310, y = 218+120+10, bold = False)
@@ -667,6 +671,9 @@ def gameloop():
                         velocity_x = init_velocity
                         velocity_y = 0
                         direction_changed = True
+                    elif event.key == pygame.K_F12 and testing_mode and debug_mode:
+                        debug_score = True
+                        debug_activated = True
                     elif (event.key == pygame.K_LEFT or event.key == pygame.K_a) and velocity_x == 0 and init_velocity != 0:
                         velocity_x = -init_velocity
                         velocity_y = 0
@@ -680,7 +687,7 @@ def gameloop():
                         velocity_x = 0
                         direction_changed = True
                     elif event.key == pygame.K_i and testing_mode:
-                        I_key_used = True
+                        debug_activated = True
                         if random.choice([1,2,3]) == 2:
                             score += 10
                         elif random.choice([1,2,3,4,5,6,7,8,9,10]) == 5:
@@ -742,22 +749,14 @@ def gameloop():
             snake_x += (velocity_x_f)
             snake_y += (velocity_y_f)
 
-            if abs(snake_x-food_x) < apple_collrate and abs(snake_y-food_y) < apple_collrate:
-                score += 10
-                # print(s_lst)
-                food_x = random.randint(40, 840)
-                food_y = random.randint(25, 550)
-                s_length += s_controler
-                show_green_apple = random.choice([False, True]) if is_independence_month else False
-
-            elif is_independence_month and show_green_apple:
+            if is_independence_month and show_green_apple:
                 # 20% chance for the green apple to appear(only on 14 August)
                 # background_image = august_background
                 # pygame.draw.rect(game_window, (0, 130, 0),
                 # pygame.Rect(green_food_x,green_food_y,snake,snake))
                 game_window.blit(green_apple, (green_food_x, green_food_y))
 
-                if abs(snake_x-green_food_x) < apple_collrate and abs(snake_y-green_food_y) < apple_collrate:
+                if (abs(snake_x-green_food_x) < apple_collrate and abs(snake_y-green_food_y) < apple_collrate) or debug_score:
                     green_food_x = random.randint(40, 840)
                     green_food_y = random.randint(25, 550)
                     score += 30
@@ -768,6 +767,21 @@ def gameloop():
                     #     break
                     # else:
                     #     pygame.event.clear()
+                    debug_score = False
+
+
+            elif (abs(snake_x-food_x) < apple_collrate and abs(snake_y-food_y) < apple_collrate) or debug_score:
+                score += 10
+                # print(s_lst)
+                food_x = random.randint(40, 840)
+                food_y = random.randint(25, 550)
+                s_length += s_controler
+                # Bug fix for green apple vanishing after existing for a moment.
+                if is_independence_month and not show_green_apple:
+                    show_green_apple = random.choice([False, True]) if is_independence_month else False
+                    # green_food_x = random.randint(40, 840)
+                    # green_food_y = random.randint(25, 550)
+                debug_score = False
 
 
             # New Snake rendering system(v3.7+)
