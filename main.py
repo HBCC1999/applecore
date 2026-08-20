@@ -197,11 +197,45 @@ def get_font(size, italic, bold):
     return _font_cache[key]
 
 
+def fading_text(text, color, x, y, bold=False, italic=False, size=16, period=2.0):
+    """Fading text using sin wave."""
+    font = get_font(size, italic, bold)
+    text_show = font.render(text, True, color)
+    # oscillates smoothly between 0 and 255
+    alpha = int((math.sin(time.time() * (2 * math.pi / period)) * 0.5 + 0.5) * 255)
+    text_show.set_alpha(alpha)
+    game_window.blit(text_show, (x, y))
+
+
+_fade_state = {"alpha":0}
+def fade_in_text(text, color, x, y, bold=False, italic=False, size=16, alpha_change=2,
+                background_box=True, padding=2, bg_color=(0,0,0), bg_alpha=128):
+    "Fade in the text (Gradually increase transparency and then keep constant) on the window."
+    font = get_font(size, italic, bold)
+    text_show = font.render(text, True, color)
+    _fade_state["alpha"] += alpha_change
+
+    if background_box and len(text) != 0:
+        text_rect = text_show.get_rect(topleft=(x, y))
+        # background box based on length of text
+        box_width = text_rect.width + padding * 2
+        box_height = text_rect.height + padding * 2
+        box_surface = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
+        # bg_color = (0,0,0)
+        
+        # box color = color + alpha
+        box_surface.fill((*bg_color, bg_alpha))
+        # box + text display
+        game_window.blit(box_surface, (x - padding, y - padding))
+
+    text_show.set_alpha(_fade_state["alpha"])
+    game_window.blit(text_show, (x,y))
+
+
 def load_text(text: str, color: tuple, x: int|float, y: int|float,
             bold: bool=False, italic: bool=False,size: int=16, padding=4, bg_color=(0,0,0),
             bg_alpha=128, background_box=True):
-    """
-    Shows Text on Window.
+    """Shows Text on Window.
     bold = True -> Bold text
     italic = True -> Italic text
     size = n -> Text size
@@ -408,9 +442,9 @@ def menu_screen():
         # load_text('Pyth0n wants to eat some apples...'.title(), yellow, 200, 150)
         # load_text("Hello "+username+"!".title(), blue, 510, 50, b=True)
         # load_text('Help him out!!!'.title(), yellow, 300, 260)
-        # load_text('press the space bar to play :)', yellow, 250, 400, True)\
-        load_text(version, (220, 220, 190), leftover_pixels(version, leftover=3, size=13, bold=False), 583, bold=False, size=13)
-        load_text("Copyright HBCC1999. All rights reserved.", (220, 220, 190), 8, 583, bold=False, size=12)
+        # load_text('press the space bar to play :)', yellow, 250, 400, True)
+        fade_in_text(version, (220, 220, 190), leftover_pixels(version, leftover=3, size=13, bold=False), 583, bold=False, size=13)
+        fade_in_text("Copyright HBCC1999. All rights reserved.", (220, 220, 190), 8, 583, bold=False, size=12)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
