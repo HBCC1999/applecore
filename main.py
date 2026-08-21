@@ -16,6 +16,7 @@ import time
 import datetime
 import psutil as p
 from pathlib import Path
+import math
 
 pygame.init()
 
@@ -140,9 +141,9 @@ try:
     should_reset_gamefilecontent = (
         not first_line_of_file.isdigit() or
         not in_game_info[1].replace('.', '', 1).isdigit() or
-        len(in_game_info)>10 or
         in_game_info[2] not in ('True', 'False')
     )
+
 except IndexError:
     should_reset_gamefilecontent = True # The file is corrupted or empty
 
@@ -198,7 +199,7 @@ def get_font(size, italic, bold):
 
 
 def fading_text(text, color, x, y, bold=False, italic=False, size=16, period=2.0):
-    """Fading text using sin wave."""
+    """Fading text (in and out) using sin wave."""
     font = get_font(size, italic, bold)
     text_show = font.render(text, True, color)
     # oscillates smoothly between 0 and 255
@@ -207,28 +208,33 @@ def fading_text(text, color, x, y, bold=False, italic=False, size=16, period=2.0
     game_window.blit(text_show, (x, y))
 
 
-_fade_state = {"alpha":0}
-def fade_in_text(text, color, x, y, bold=False, italic=False, size=16, alpha_change=2,
-                background_box=True, padding=2, bg_color=(0,0,0), bg_alpha=128):
-    "Fade in the text (Gradually increase transparency and then keep constant) on the window."
+_fade_states = {}
+def fade_in_text(text, color, x, y, bold=False, italic=False, size=16, key=None, background_box=True,
+                padding=2, bg_color=(0,0,0), bg_alpha=128, reset=False, duration=1):
+    """Fade text in from transparent to opaque over `duration` seconds, then stays opaque."""
     font = get_font(size, italic, bold)
     text_show = font.render(text, True, color)
-    _fade_state["alpha"] += alpha_change
+
+    fade_key = key if key is not None else text
+
+    if reset or fade_key not in _fade_states:
+        _fade_states[fade_key] = time.time()
+
+    elapsed = time.time() - _fade_states[fade_key]
+    progress = min(elapsed/duration, 1) if duration!=0 else 1
+    alpha = int(progress*255)
 
     if background_box and len(text) != 0:
         text_rect = text_show.get_rect(topleft=(x, y))
-        # background box based on length of text
+
         box_width = text_rect.width + padding * 2
         box_height = text_rect.height + padding * 2
         box_surface = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
-        # bg_color = (0,0,0)
-        
-        # box color = color + alpha
+
         box_surface.fill((*bg_color, bg_alpha))
-        # box + text display
         game_window.blit(box_surface, (x - padding, y - padding))
 
-    text_show.set_alpha(_fade_state["alpha"])
+    text_show.set_alpha(alpha)
     game_window.blit(text_show, (x,y))
 
 
@@ -444,7 +450,7 @@ def menu_screen():
         # load_text('Help him out!!!'.title(), yellow, 300, 260)
         # load_text('press the space bar to play :)', yellow, 250, 400, True)
         fade_in_text(version, (220, 220, 190), leftover_pixels(version, leftover=3, size=13, bold=False), 583, bold=False, size=13)
-        fade_in_text("Copyright HBCC1999. All rights reserved.", (220, 220, 190), 8, 583, bold=False, size=12)
+        fade_in_text("Copyright HBCC1999. All rights reserved.", (220, 220, 190), 8, 583, bold=False, size=12, duration=0.5)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
