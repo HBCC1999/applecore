@@ -1,6 +1,6 @@
 """Applecore (Standard) v3.8-beta.1-dev
 Copyright (c) 2024-2026 HBCC1999. All rights reserved.
-Licensed under the terms in LICENSE. Unauthorized redistribution prohibited.
+Licensed under the terms in LICENSE and ASSET_LICENSE. Unauthorized redistribution prohibited.
 Developed by HBCC1999
 Textures: Some are made by the author and some are AI-generated.
 Audio: From Youtube Studio
@@ -186,11 +186,12 @@ def usertext(event):
 # font
 # printing text on game
 _font_cache = {}
-def get_font(size, italic, bold):
+DEFAULT_FONT = "assets/PressStart2P-Regular.ttf"
+def get_font(size, italic, bold, font_path_relative=DEFAULT_FONT):
     """Returns specified font from _font_cache, thus preventing unnecessary IO calls for same key"""
     key = (size, italic, bold)
     if key not in _font_cache:
-        font = pygame.font.Font(resource_path("assets/PressStart2P-Regular.ttf"), size=size)
+        font = pygame.font.Font(resource_path(font_path_relative), size=size)
         font.set_bold(bold)
         font.set_italic(italic)
         _font_cache[key] = font
@@ -693,7 +694,7 @@ def gameloop():
                 218 + 90 + 10,
                 bold=False,
                 key = "appocity"
-            )
+            ) # bg_alpha = 110 might be a better choice...
             fade_in_text(
                 f"Difficulty: {difficulty}",
                 color=(
@@ -989,6 +990,7 @@ def gameloop():
                 cpu_unused = 100 - p.cpu_percent(interval=None)
                 # Checking if the battery sensor is available and getting the battery unused percentage, if not available setting it to 100% unused
                 battery_unused = 100 if p.sensors_battery() is None else p.sensors_battery().percent
+                # battery_unused =
                 # battery_unused = random.randint(1, 50)
                 vram_unused = 100 - p.virtual_memory().percent
                 # New quantity that measures the overall optimization of the system for gaming, calculated using the battery, cpu and vram unused percentages
@@ -1016,7 +1018,7 @@ def gameloop():
                     # fps = 20
                     target_fps = 20 # lowest fps
 
-                target_fps = 20 if target_fps < 20 else target_fps
+                target_fps = max(target_fps, 20)
                 target_fps = int(target_fps)
                 # print(optimization_index, target_fps)
                 time_before_game_loop = time.time()
@@ -1115,15 +1117,12 @@ def gameloop():
         pygame.display.update()
 
     pygame.quit()
-    sys.exit()
+    sys.exit() # The End, for now, Hope you return back!
 
 
 def main():
     """Main Function, where the whole game comes up together!"""
     menu_screen()
-    game_loop()
-    
-
 
 if __name__ == "__main__":
     main()
