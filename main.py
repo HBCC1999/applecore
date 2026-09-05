@@ -209,8 +209,10 @@ def fading_text(text, color, x, y, bold=False, italic=False, size=16, period=2.0
     game_window.blit(text_show, (x, y))
 
 _alpha_states = {}
-def fading_background_filter(surface: pygame.Surface, x=0, y=0, start_alpha=170, target_alpha=0, fade_speed=2, reset=False):
-    """Frame-based fading background (one way), reset=True means you can redisplay the effect on the same surface on repeted calls."""
+def fading_background_filter(surface: pygame.Surface, x=0, y=0, start_alpha=100,
+                             target_alpha=0, fade_speed=2, reset=False, cycle=False):
+    """Frame-based fading background, reset=True means you can redisplay the effect on the same surface on repeted calls.
+    If you want an oscilating-fade, then turn cycle to True, and fade_speed to the value of period of this oscillation."""
     fade_in = start_alpha > target_alpha
 
     # background_filter = surface.get_rect()
@@ -220,23 +222,24 @@ def fading_background_filter(surface: pygame.Surface, x=0, y=0, start_alpha=170,
     overlay = pygame.Surface((surface.get_width(), surface.get_height()), pygame.SRCALPHA)
     overlay.fill((0,0,0,255))
 
-    current_alpha = _alpha_states.get(surface)
+    current_alpha = _alpha_states.get(surface) if not cycle else int((math.sin(time.time() * (2 * math.pi / fade_speed)) * 0.5 + 0.5) * 255)
 
-    if current_alpha is None:
-        _alpha_states[surface] = start_alpha
-        current_alpha = start_alpha
+    if not cycle:
+        if current_alpha is None:
+            _alpha_states[surface] = start_alpha
+            current_alpha = start_alpha
 
-    if fade_in and current_alpha>target_alpha:
-        current_alpha = max(current_alpha - fade_speed, target_alpha)
-    elif fade_in and current_alpha < 255:
-        current_alpha = min(current_alpha + fade_speed, 255)
-    elif not fade_in and current_alpha < target_alpha:
-        current_alpha = min(current_alpha + fade_speed, target_alpha)
-    elif not fade_in and current_alpha > 0:
-        current_alpha = max(current_alpha - fade_speed, 0)
+        if fade_in and current_alpha>target_alpha:
+            current_alpha = max(current_alpha - fade_speed, target_alpha)
+        elif fade_in and current_alpha < 255:
+            current_alpha = min(current_alpha + fade_speed, 255)
+        elif not fade_in and current_alpha < target_alpha:
+            current_alpha = min(current_alpha + fade_speed, target_alpha)
+        elif not fade_in and current_alpha > 0:
+            current_alpha = max(current_alpha - fade_speed, 0)
 
-    if current_alpha != _alpha_states[surface]:
-        _alpha_states[surface] = current_alpha
+        if current_alpha != _alpha_states[surface]:
+            _alpha_states[surface] = current_alpha
 
     overlay.set_alpha(current_alpha)
 
@@ -245,7 +248,7 @@ def fading_background_filter(surface: pygame.Surface, x=0, y=0, start_alpha=170,
 
 _fade_states = {}
 def fade_in_text(text, color, x, y, bold=False, italic=False, size=16, key=None, background_box=True,
-                padding=2, bg_color=(0,0,0), bg_alpha=128, reset=False, duration=1):
+                padding=2, bg_color=(0,0,0), bg_alpha=128, reset=False, duration:float=1):
     """Fade text in from transparent to opaque over `duration` seconds, then stays opaque."""
     font = get_font(size, italic, bold)
     text_show = font.render(text, True, color)
@@ -457,7 +460,7 @@ def settings_page():
                         menu_screen()
 
         if time.time() - save_text_time < 1:
-            load_text("Username saved successfully", x=20, y=570, color=green)
+            fade_in_text("Username saved successfully", x=20, y=570, color=green)
 
         text_input = text_input.strip("\r")
         text_input = text_input.replace(" ", "_")
@@ -487,7 +490,7 @@ def menu_screen():
         # load_text('Help him out!!!'.title(), yellow, 300, 260)
         # load_text('press the space bar to play :)', yellow, 250, 400, True)
         fade_in_text(version, (220, 220, 190), leftover_pixels(version, leftover=3, size=13, bold=False), 583, bold=False, size=13)
-        fade_in_text("Copyright HBCC1999. All rights reserved.", (220, 220, 190), 8, 583, bold=False, size=12, duration=0.5)
+        fade_in_text("Copyright HBCC1999. All rights reserved.", (220, 220, 190), 8, 583, bold=False, size=12)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -626,7 +629,7 @@ def gameloop():
                 show_green_apple = random.choice([False, False, False, False, True])
 
             game_window.fill(white)
-            game_window.blit(go, (0, 0))
+            fading_background_filter(go)
 
             plot_snake(game_window, (blue[0]+80, blue[1], blue[2]-100), s_lst, snake) # Snake frozen in time after death.
             # game_window.blit(red_apple, (food_x, food_y)) if testing_mode else None
@@ -644,7 +647,7 @@ def gameloop():
             )
 
             fade_in_text("PRESS ENTER TO CONTINUE", red, 270, 218 + 6)
-            fade_in_text(f"Highscore: {h_score}", (0, 191, 255), 10, 7, bold=False)
+            fade_in_text(f"Highscore: {h_score}", (0, 191, 255), 10, 7, bold=False, key="highscore")
             fade_in_text(
                 f"Highest Appocity: {h_appocity}",
                 (0, 191, 255),
@@ -659,6 +662,7 @@ def gameloop():
                 ),
                 7,
                 bold=False,
+                key = "record-appocity"
             )
 
             scr.append(score)
@@ -669,6 +673,7 @@ def gameloop():
                 365,
                 218 + 30 + 10,
                 bold=False,
+                key = "score"
             )
             fade_in_text(
                 f"Time Taken: {time_taken_to_score}",
@@ -676,6 +681,7 @@ def gameloop():
                 330,
                 218 + 60 + 10,
                 bold=False,
+                key = "time-taken-to-score"
             )
             # load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if (appocity is not None and appocity <= 1) else "apples"}/second'.capitalize()
             # ,(yellow if (not testing_mode and not debug_activated) else orange),
@@ -686,6 +692,7 @@ def gameloop():
                 300,
                 218 + 90 + 10,
                 bold=False,
+                key = "appocity"
             )
             fade_in_text(
                 f"Difficulty: {difficulty}",
@@ -703,6 +710,7 @@ def gameloop():
                 x=310,
                 y=218 + 120 + 10,
                 bold=False,
+                key = "difficulty"
             )
             fade_in_text("Go Again!", (0, 123, 255), 300 + 65, 218 + 150 + 10, size=20)
 
@@ -1049,10 +1057,10 @@ def gameloop():
 
             plot_snake(game_window, blue, s_lst, snake) # Draw the snake
 
-            load_text('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10)
+            fade_in_text('Score: ' + str(score)+ f' Highscore: {h_score}', green, 12, 10, key="score-panel", duration=0.5)
 
             # FPS indicator, green means constant frames and yellow means dynamic fps
-            load_text(str(fps), (yellow if Dynamic_FPS else green), leftover_pixels(str(fps), leftover=3), 7)
+            fade_in_text(str(fps), (yellow if Dynamic_FPS else green), leftover_pixels(str(fps), leftover=3), 7, key="current-fps", duration=0.5)
             
             # Debug/Test Mode State Indication
             if Dynamic_FPS:
