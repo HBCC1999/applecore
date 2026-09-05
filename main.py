@@ -7,6 +7,7 @@ Audio: From Youtube Studio
 Font by: Codeman38
 ----------------------------------------------------------------------------
 """
+
 # using pygame-ce instead of pygame because pygame-ce is more up to date and has more features than pygame
 import pygame
 import random
@@ -207,6 +208,40 @@ def fading_text(text, color, x, y, bold=False, italic=False, size=16, period=2.0
     text_show.set_alpha(alpha)
     game_window.blit(text_show, (x, y))
 
+_alpha_states = {}
+def fading_background_filter(surface: pygame.Surface, x=0, y=0, start_alpha=170, target_alpha=0, fade_speed=2, reset=False):
+    """Frame-based fading background (one way), reset=True means you can redisplay the effect on the same surface on repeted calls."""
+    fade_in = start_alpha > target_alpha
+
+    # background_filter = surface.get_rect()
+    # background_filter.topleft = (x, y)
+    # game_window.blit(surface, background_filter)
+
+    overlay = pygame.Surface((surface.get_width(), surface.get_height()), pygame.SRCALPHA)
+    overlay.fill((0,0,0,255))
+
+    current_alpha = _alpha_states.get(surface)
+
+    if current_alpha is None:
+        _alpha_states[surface] = start_alpha
+        current_alpha = start_alpha
+
+    if fade_in and current_alpha>target_alpha:
+        current_alpha = max(current_alpha - fade_speed, target_alpha)
+    elif fade_in and current_alpha < 255:
+        current_alpha = min(current_alpha + fade_speed, 255)
+    elif not fade_in and current_alpha < target_alpha:
+        current_alpha = min(current_alpha + fade_speed, target_alpha)
+    elif not fade_in and current_alpha > 0:
+        current_alpha = max(current_alpha - fade_speed, 0)
+
+    if current_alpha != _alpha_states[surface]:
+        _alpha_states[surface] = current_alpha
+
+    overlay.set_alpha(current_alpha)
+
+    game_window.blit(surface, (x,y))
+    game_window.blit(overlay, (x,y))
 
 _fade_states = {}
 def fade_in_text(text, color, x, y, bold=False, italic=False, size=16, key=None, background_box=True,
@@ -278,7 +313,7 @@ def load_text(text: str, color: tuple, x: int|float, y: int|float,
 def text_dimensions(text: str, bold: bool=False, italic: bool=False, size: int=16, 
                     padding=4, background_box=True):
     """Values of the width and height of the overlay panel(background box) and the text itself, in pixels."""
-    
+
     font = get_font(size, italic, bold)
     # txt = font.render(text, True, color)
     text_width, text_height = font.size(text)
@@ -324,6 +359,7 @@ def independendence_day_page():
     while not quit_game:
         game_window.fill((220, 200, 240))
         # elapsed = time.time() - start_time
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game = True
@@ -440,6 +476,7 @@ def menu_screen():
         pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1)
     quit_game = False
+    
     while not quit_game:
         game_window.fill((220, 200, 240))
         game_window.blit(myimg, (0, 0))
@@ -523,7 +560,7 @@ def gameloop():
     snake = 30
     apple_collrate = 12
     collrate = 7
-    segment_spacing = 6 # How spaced each square should be, lower value equals better visuals
+    segment_spacing = 6 # how spaced each square should be, lower value equals better visuals
     distance_since_last_segment = 0
     trailing_buffer = 5
     fps = DEFAULT_FPS
@@ -593,28 +630,81 @@ def gameloop():
 
             plot_snake(game_window, (blue[0]+80, blue[1], blue[2]-100), s_lst, snake) # Snake frozen in time after death.
             # game_window.blit(red_apple, (food_x, food_y)) if testing_mode else None
-            difficulty = "Easy" if apple_collrate == 16 else "Medium" if apple_collrate == 12 else "Hard" if apple_collrate == 8 else "Ultra-Hard" if apple_collrate == 4 else "not known"
 
-            load_text('PRESS ENTER TO CONTINUE',
-                  red, 270, 218+6)
-            load_text(f'Highscore: {h_score}'
-                      , (0, 191, 255), 10, 7,bold=False )
-            load_text(f'Highest Appocity: {h_appocity}'
-                      , (0, 191, 255), leftover_pixels(f'Highest Appocity: {h_appocity}', bold=False, size=16, padding=4, background_box=True, side="x", leftover=5), 7,bold=False )
+            difficulty = (
+                "Easy"
+                if apple_collrate == 16
+                else "Medium"
+                if apple_collrate == 12
+                else "Hard"
+                if apple_collrate == 8
+                else "Ultra-Hard"
+                if apple_collrate == 4
+                else "not known"
+            )
+
+            fade_in_text("PRESS ENTER TO CONTINUE", red, 270, 218 + 6)
+            fade_in_text(f"Highscore: {h_score}", (0, 191, 255), 10, 7, bold=False)
+            fade_in_text(
+                f"Highest Appocity: {h_appocity}",
+                (0, 191, 255),
+                leftover_pixels(
+                    f"Highest Appocity: {h_appocity}",
+                    bold=False,
+                    size=16,
+                    padding=4,
+                    background_box=True,
+                    side="x",
+                    leftover=5,
+                ),
+                7,
+                bold=False,
+            )
+
             scr.append(score)
-            load_text(f"Score: {score}",(yellow if (not testing_mode and not debug_activated) else orange), 
-                      365, 218+30+10, bold = False)
-            load_text(f"Time Taken: {time_taken_to_score}",(yellow if (not testing_mode and not debug_activated) else orange), 
-                      330, 218+60+10, bold = False)
+
+            fade_in_text(
+                f"Score: {score}",
+                (yellow if (not testing_mode and not debug_activated) else orange),
+                365,
+                218 + 30 + 10,
+                bold=False,
+            )
+            fade_in_text(
+                f"Time Taken: {time_taken_to_score}",
+                (yellow if (not testing_mode and not debug_activated) else orange),
+                330,
+                218 + 60 + 10,
+                bold=False,
+            )
             # load_text(f'Appocity = {appocity if appocity is not None else "undefined"} {"apple" if (appocity is not None and appocity <= 1) else "apples"}/second'.capitalize()
-            # ,(yellow if (not testing_mode and not debug_activated) else orange), 
+            # ,(yellow if (not testing_mode and not debug_activated) else orange),
             # 330, 218+90, bold=False)
-            load_text(f'Appocity: {appocity if appocity is not None else "None"} aps'.capitalize()
-            ,(yellow if (not testing_mode and not debug_activated) else orange), 
-            300, 218+90+10, bold=False)
-            load_text(f'Difficulty: {difficulty}', color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow)
-                      ,x = 310, y = 218+120+10, bold = False)
-            load_text('Go Again!', (0, 123, 255), 300+65, 218+150+10, size=20)
+            fade_in_text(
+                f"Appocity: {appocity if appocity is not None else 'None'} aps".capitalize(),
+                (yellow if (not testing_mode and not debug_activated) else orange),
+                300,
+                218 + 90 + 10,
+                bold=False,
+            )
+            fade_in_text(
+                f"Difficulty: {difficulty}",
+                color=(
+                    green
+                    if difficulty == "Easy"
+                    else yellow
+                    if difficulty == "Medium"
+                    else orange
+                    if difficulty == "Hard"
+                    else red
+                    if difficulty == "Ultra-Hard"
+                    else yellow
+                ),
+                x=310,
+                y=218 + 120 + 10,
+                bold=False,
+            )
+            fade_in_text("Go Again!", (0, 123, 255), 300 + 65, 218 + 150 + 10, size=20)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -777,7 +867,7 @@ def gameloop():
                         difficulty_velocity_change = round((BASE_VELOCITY)*(30/100))
 
             game_window.fill(white)
-            game_window.blit(background_image, (0, 0))
+            fading_background_filter(background_image, 0, 0)
 
             if (velocity_x != 0 or velocity_y !=0) and time1 is None:
                 time1 = time.time()
@@ -981,8 +1071,28 @@ def gameloop():
                     load_text("Debug: Test Mode Disabled", red, 10, 575, bold = False)
 
             # Difficulty Mode State Indication
-            difficulty = "Easy" if apple_collrate == 16 else "Medium" if apple_collrate == 12 else "Hard" if apple_collrate == 8 else "Ultra-Hard" if apple_collrate == 4 else "not known"
-            color = (green if difficulty == "Easy" else yellow if difficulty == "Medium" else orange if difficulty == "Hard" else red if difficulty == "Ultra-Hard" else yellow)
+            difficulty = (
+                "Easy"
+                if apple_collrate == 16
+                else "Medium"
+                if apple_collrate == 12
+                else "Hard"
+                if apple_collrate == 8
+                else "Ultra-Hard"
+                if apple_collrate == 4
+                else "not known"
+            )
+            color = (
+                green
+                if difficulty == "Easy"
+                else yellow
+                if difficulty == "Medium"
+                else orange
+                if difficulty == "Hard"
+                else red
+                if difficulty == "Ultra-Hard"
+                else yellow
+            )
 
             if time.time()-difficulty_mode_change_time_start < 1:
                 load_text(f"Set {username}'s Difficulty Mode to {difficulty}", color, 10, 575, bold = False)
@@ -1003,6 +1113,9 @@ def gameloop():
 def main():
     """Main Function, where the whole game comes up together!"""
     menu_screen()
+    game_loop()
+    
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
