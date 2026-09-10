@@ -15,3 +15,4 @@ dist/
 build/
 plans.txt
 .wakatime-project
+hex_code_to_rgb_tuple.py

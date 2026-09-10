@@ -83,8 +83,8 @@ icon = pygame.image.load(resource_path('assets/appicon.png'))
 icon = pygame.transform.scale(icon, (32, 32)).convert_alpha()
 pygame.display.set_icon(icon)
 pygame.display.set_caption(GAME_VERSION)
-myimg = pygame.image.load(resource_path('assets/menu_screen_image.jpg'))
-myimg = pygame.transform.scale(myimg, (900, 600)).convert_alpha()
+menu_screen_backdrop = pygame.image.load(resource_path('assets/menu_screen_image.jpg'))
+menu_screen_backdrop = pygame.transform.scale(menu_screen_backdrop, (900, 600)).convert_alpha()
 go = pygame.image.load(resource_path('assets/game_over_screen.jpg'))
 go = pygame.transform.scale(go, (900, 600)).convert_alpha()
 default_background_image = pygame.image.load(resource_path('assets/background_image.jpg'))
@@ -200,13 +200,32 @@ def get_font(size, italic, bold, font_path_relative=DEFAULT_FONT):
     return _font_cache[key]
 
 
-def fading_text(text, color, x, y, bold=False, italic=False, size=16, period=2.0):
+def fading_text(text, color, x, y, bold=False, italic=False, size=16, period=2.0, background_box = True, padding = 2,
+                bg_alpha=128, bg_color=(0, 0, 0), key="dummy variable"):
     """Fading text (in and out) using sin wave."""
     font = get_font(size, italic, bold)
     text_show = font.render(text, True, color)
+
+    if background_box and len(text) != 0:
+        text_rect = text_show.get_rect(topleft=(x, y))
+
+        # background box based on length of text
+        box_width = text_rect.width + padding * 2
+        box_height = text_rect.height + padding * 2
+        box_surface = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
+        # bg_color = (0,0,0)
+        
+        # box color = color + alpha
+        box_surface.fill((*bg_color, bg_alpha))
+
+        # box + text display
+        game_window.blit(box_surface, (x - padding, y - padding))
+
+
     # oscillates smoothly between 0 and 255
     alpha = int((math.sin(time.time() * (2 * math.pi / period)) * 0.5 + 0.5) * 255)
     text_show.set_alpha(alpha)
+
     game_window.blit(text_show, (x, y))
 
 _alpha_states = {}
@@ -225,19 +244,19 @@ def fading_background_filter(surface: pygame.Surface, x=0, y=0, start_alpha=100,
 
     current_alpha = _alpha_states.get(surface) if not cycle else int((math.sin(time.time() * (2 * math.pi / fade_speed)) * 0.5 + 0.5) * 255)
 
+    # if reset:
+    #     current_alpha = start_alpha
+    #     _alpha_states[surface] = current_alpha
+    
     if not cycle:
         if current_alpha is None:
-            _alpha_states[surface] = start_alpha
+            _alpha_states[surface] = start_alpha # key would have been path, if pygame allowed paths to be associated with pygame.Surface for pygame.image.load
             current_alpha = start_alpha
 
-        if fade_in and current_alpha>target_alpha:
+        if fade_in:
             current_alpha = max(current_alpha - fade_speed, target_alpha)
-        elif fade_in and current_alpha < 255:
-            current_alpha = min(current_alpha + fade_speed, 255)
-        elif not fade_in and current_alpha < target_alpha:
+        else:
             current_alpha = min(current_alpha + fade_speed, target_alpha)
-        elif not fade_in and current_alpha > 0:
-            current_alpha = max(current_alpha - fade_speed, 0)
 
         if current_alpha != _alpha_states[surface]:
             _alpha_states[surface] = current_alpha
@@ -483,13 +502,21 @@ def menu_screen():
     
     while not quit_game:
         game_window.fill((220, 200, 240))
-        game_window.blit(myimg, (0, 0))
+        # game_window.blit(menu_screen_backdrop, (0, 0))
+        fading_background_filter(menu_screen_backdrop, 0, 0, start_alpha=230, fade_speed=5)
 
         # game_window.blit(si, (817, 56))
         # load_text('Pyth0n wants to eat some apples...'.title(), yellow, 200, 150)
         # load_text("Hello "+username+"!".title(), blue, 510, 50, b=True)
         # load_text('Help him out!!!'.title(), yellow, 300, 260)
         # load_text('press the space bar to play :)', yellow, 250, 400, True)
+
+        fade_in_text("Press Enter or Space to play.",(255, 248, 150), 217, game_window.height//2+20
+                     , duration=2)
+        
+        # fade_in_text("Press Enter or Space to play.",(188, 188, 188), 217, game_window.height//2+20
+        #              , duration=2)
+        
         fade_in_text(version, (220, 220, 190), leftover_pixels(version, leftover=3, size=13, bold=False), 583, bold=False, size=13)
         fade_in_text("Copyright HBCC1999. All rights reserved.", (220, 220, 190), 8, 583, bold=False, size=12)
 
@@ -602,10 +629,22 @@ def gameloop():
     show_green_apple = random.choice([False, False, False, False, True])
     time_before_game_loop = time.time()
 
+    dt_test = False
+    if dt_test:
+        _dt_lst = []
+        start_time_for_dt_registeration = 0
+
     while not quit_game:
         dt = clock.tick(fps) / 1000.0  # Amount of seconds between each loop/frame and seconds because i follow SI units.
         dt = min(dt, 0.05) # Cap it at 50ms. So no stutters and wierd teleportation after toggling pause_menu
-    
+
+        if dt_test and time.time() - start_time_for_dt_registeration >= 0.5:
+            _dt_lst.append(dt)
+            start_time_for_dt_registeration = time.time()
+            print(abs(sum(_dt_lst)/len(_dt_lst)-dt)) # 10+ ms -> Stuttering
+            if len(_dt_lst) > 20:
+                del _dt_lst[0]
+
         if game_over:
             fps = 30
             if death_frame:
@@ -647,8 +686,9 @@ def gameloop():
                 else "not known"
             )
 
-            fade_in_text("PRESS ENTER TO CONTINUE", red, 270, 218 + 6)
-            fade_in_text(f"Highscore: {h_score}", (0, 191, 255), 10, 7, bold=False, key="highscore")
+            fading_text("PRESS ENTER TO CONTINUE", red, 270, 218 + 6, period=2)
+            # fade_in_text(f"Highscore: {h_score}", (0, 191, 255), 10, 7, bold=False, key="highscore")
+            fade_in_text(f"Highscore: {h_score}", (0, 191, 255), 10, 7, bold=False, key = "highscore")
             fade_in_text(
                 f"Highest Appocity: {h_appocity}",
                 (0, 191, 255),
