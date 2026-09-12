@@ -378,6 +378,28 @@ def leftover_pixels(text: str, bold: bool=False, italic: bool=False, size: int=1
     return screen_size - leftover - size_to_use
 
 
+def save_game_stats(score, time_taken_to_score, h_score,
+                    h_appocity, in_game_info, Dynamic_FPS, testing_mode, debug_activated):
+    """Saves the score, appocity and checks its legitimacy."""
+    appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
+    
+    # Checking if the current appocity is greater than the highest appocity and updating it if necessary
+    if appocity is not None and (appocity) > float(h_appocity) and not testing_mode and not debug_activated:
+        h_appocity = str(appocity)
+        in_game_info[1] = str(appocity)
+    
+    # Checking if the current score is greater than the highscore and updating it if necessary
+    if score > int(h_score) and not testing_mode and not debug_activated:
+        h_score = str(score)
+        in_game_info[0] = str(score)
+    
+    if in_game_info[2] != str(Dynamic_FPS):
+        in_game_info[2] = str(Dynamic_FPS)
+
+    save_data("\n".join(in_game_info))
+
+    return h_score, h_appocity, appocity
+
 def independendence_day_page():
     """An easter egg to celibrate Pakistan's Independence day on 14th August. (any year)"""
     pygame.event.clear()
@@ -424,15 +446,13 @@ def pause_window():
                 if not mute_music:
                     pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
                     pygame.mixer.music.play(-1)
-                sys.exit()
-                return quit_game
+                # sys.exit()
+                return True, time.time() - s_time
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    pause_game = False
                     quit_game=True
-                    time_paused = time.time() - s_time
-                    return time_paused
+                    return False, time.time() - s_time
                 
         pygame.display.update()
         clock.tick(30)
@@ -611,7 +631,7 @@ def gameloop():
     h_score = in_game_info[0]
     h_appocity = in_game_info[1]
 
-    appocity = "0 apple/second"
+    appocity = 0.0
     quit_game = False
     game_over = False
 
@@ -661,23 +681,10 @@ def gameloop():
             fps = 30
             if death_frame:
                 death_frame = False
-                appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
-                
-                # Checking if the current appocity is greater than the highest appocity and updating it if necessary
-                if appocity is not None and (appocity) > float(h_appocity) and not testing_mode and not debug_activated:
-                    h_appocity = str(appocity)
-                    in_game_info[1] = str(appocity)
-                
-                # Checking if the current score is greater than the highscore and updating it if necessary
-                if score > int(h_score) and not testing_mode and not debug_activated:
-                    h_score = str(score)
-                    in_game_info[0] = str(score)
-                
-                if in_game_info[2] != str(Dynamic_FPS):
-                    in_game_info[2] = str(Dynamic_FPS)
-
-                save_data("\n".join(in_game_info))
-
+                h_score, h_appocity, appocity = save_game_stats(
+                    score, time_taken_to_score, h_score,
+                    h_appocity, in_game_info, Dynamic_FPS, testing_mode, debug_activated
+                )
                 show_green_apple = random.choice([False, False, False, False, True])
 
             game_window.fill(white)
@@ -801,23 +808,13 @@ def gameloop():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     time_taken_to_score = round(time.time() - time1 - time_paused, 2) if time1 is not None else 0
-                    appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
-                    # Checking if the current appocity is greater than the highest appocity and updating it if necessary
-                    if appocity is not None and (appocity) > float(h_appocity) and not testing_mode and not debug_activated:
-                        h_appocity = str(appocity)
-                        in_game_info[1] = str(appocity)
-                    # print(time_taken_to_score, appocity, h_appocity)
-                    
-                    # Checking if the current score is greater than the highscore and updating it if necessary
-                    if score > int(h_score)  and not testing_mode and not debug_activated:
-                        h_score = str(score)
-                        in_game_info[0] = str(score)
-                    
-                    if in_game_info[2] != str(Dynamic_FPS):
-                        in_game_info[2] = str(Dynamic_FPS)
+                    h_score, h_appocity, appocity = save_game_stats(
+                        score, time_taken_to_score, h_score,
+                        h_appocity, in_game_info, Dynamic_FPS, testing_mode, debug_activated
+                    )
 
-                    save_data("\n".join(in_game_info))
-
+                    print("Debug: Save data before closing.")
+                    
                     quit_game = True
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -1163,7 +1160,18 @@ def gameloop():
                 load_text(f"Debug: Independence Month State is set to {is_independence_month}", color, 10, 575, bold = False)
 
             if pause_game:
-                time_paused += pause_window()
+                is_quit, elapsed = pause_window()
+                time_paused += elapsed
+
+                if is_quit:
+                    time_taken_to_score = round(time.time() - time1 - time_paused, 2) if time1 is not None else 0
+                    h_score, h_appocity, appocity = save_game_stats(
+                        score, time_taken_to_score, h_score, h_appocity,
+                        in_game_info, Dynamic_FPS, testing_mode, debug_activated
+                    )
+                    quit_game = True
+                    print("Debug: Force closing the game.")
+
                 pause_game = False
 
         pygame.display.update()
