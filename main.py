@@ -200,8 +200,8 @@ def get_font(size, italic, bold, font_path_relative=DEFAULT_FONT):
     return _font_cache[key]
 
 
-def fading_text(text, color, x, y, bold=False, italic=False, size=16, period=2.0, background_box = True, padding = 2,
-                bg_alpha=128, bg_color=(0, 0, 0), key="dummy variable"):
+def fading_text(text, color, x, y, bold=False, italic=False, size=16, period=2.0, background_box = True, padding = 2, max_alpha=255, min_alpha=0,
+                bg_alpha=128, background_box_fade=True, bg_color=(0, 0, 0), key="dummy variable", min_alpha_bg=30):
     """Fading text (in and out) using sin wave."""
     font = get_font(size, italic, bold)
     text_show = font.render(text, True, color)
@@ -213,17 +213,22 @@ def fading_text(text, color, x, y, bold=False, italic=False, size=16, period=2.0
         box_width = text_rect.width + padding * 2
         box_height = text_rect.height + padding * 2
         box_surface = pygame.Surface((box_width, box_height), pygame.SRCALPHA)
+        if background_box_fade:
+            normalized = math.sin(time.time() * (2 * math.pi / period)) * 0.5 + 0.5  # 0..1
+            alpha_bg = int(min_alpha_bg + normalized * (bg_alpha-min_alpha_bg))
+        else:
+            alpha_bg = bg_alpha # constant transparency/opacity
         # bg_color = (0,0,0)
         
         # box color = color + alpha
-        box_surface.fill((*bg_color, bg_alpha))
+        box_surface.fill((*bg_color, alpha_bg))
 
         # box + text display
         game_window.blit(box_surface, (x - padding, y - padding))
 
-
     # oscillates smoothly between 0 and 255
-    alpha = int((math.sin(time.time() * (2 * math.pi / period)) * 0.5 + 0.5) * 255)
+    normalized_alpha = math.sin(time.time() * (2 * math.pi / period)) * 0.5 + 0.5
+    alpha = int(min_alpha + normalized_alpha*(max_alpha-min_alpha))
     text_show.set_alpha(alpha)
 
     game_window.blit(text_show, (x, y))
@@ -499,6 +504,7 @@ def menu_screen():
         pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1)
     quit_game = False
+    time_start_message = time.time()
     
     while not quit_game:
         game_window.fill((220, 200, 240))
@@ -511,9 +517,15 @@ def menu_screen():
         # load_text('Help him out!!!'.title(), yellow, 300, 260)
         # load_text('press the space bar to play :)', yellow, 250, 400, True)
 
-        fade_in_text("Press Enter or Space to play.",(255, 248, 150), 217, game_window.height//2+20
-                     , duration=2)
-        
+        # fading_text("Press Enter or Space to play.",(255, 248, 150), 217, game_window.height//2+20
+        #             , period=2.25)
+        if time.time() - time_start_message >= 1/2:
+            fading_text("Press Enter or Space to play.",(255, 248, 150), 217, game_window.height//2+20
+                        , period=2.25)
+        else:
+            fade_in_text("Press Enter or Space to play.",(255, 248, 150), 217, game_window.height//2+20
+                        , duration=1.8)
+            
         # fade_in_text("Press Enter or Space to play.",(188, 188, 188), 217, game_window.height//2+20
         #              , duration=2)
         
