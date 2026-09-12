@@ -1,5 +1,5 @@
 # Applecore 🍎
-Applecore is an over-engineered, 2D voxel style game, where you devour apples for survival with a speedrunning theme, featuring elements like appocity(score per second) and giving you the control of the snake's attributes like speed, growth factor etc, using keybinds.
+Applecore is an over-engineered, voxel-style game, where you devour apples for survival with a speedrunning theme, featuring elements like appocity (score per second) and giving you the control of the snake's attributes like speed, growth factor etc, using keybinds. Dive deep into the dynamic adventure and constant challenging gameplay. Let the hype of the snake game comeback with a new spirit!
 
 # Controls
 
@@ -37,7 +37,9 @@ You can veiw snake's last position in game over screen. (Applecore v3.8+)
 Applecore is expected to work on Windows 10 and 11 without any issues. The code might run on windows 7 but the python interpretor used (3.11) doesnt support Windows 7. I might release a backport edition for windows 7, if you guys want. Linux and mac support the code, but I only release exe files for now, which run on windows machine only. Android is not supported.
 
 # System Requirements
-Works best on Win 11 or 10. Should work on Win 7, though not the executable because it bundles Python 3.11, where as win 7 works best up till Python 3.7. Linux and mac don't support exe files. Applecore is really light-weight and can run on any system, including low-end pcs, desktops, laptops etc, anything that has windows.
+Works best on Win 11 or 10. Linux and Mac don't support exe files. Applecore is really light-weight and can run on any system, including low-end pcs, desktops, laptops etc, anything that has windows.
+For Win 7, 8 or 8.1, you can check out the backport edition of applecore, made specifically for older os with the exact same features and gameplay as the Standard Edition.
+[Backport Edition](https://github.com/HBCC1999/applecore-backport) (You can also download the backport edition if you wan't a smaller size of the game without compromising any features)
 
 # Known Issues
 The game uses the same loop (game_loop) for game_over screen and main-game, for easy access to local variables. However, if player wants to restart game from game over screen, the game uses recursion to call game_loop again. By default, Python has a recursion limit, which means after 1000 runs, the game will crash. Now this is unlikely for most players and is expected to be fixed. You can restart the game to reset limit to 1000 runs again.
@@ -62,26 +64,27 @@ Note: For more details on these versions, go to the releases page.
 - Python 3.11 — Programming Language
 - pygame-ce — Main library that powers the game
 - psutil — Fetches system resource data for optimization index which alters the FPS accordingly aka Dynamic FPS (v3.6+)
-- auto-py-to-exe — Compiles source code into .exe via PyInstaller
+- pyinstaller — Compiles the source code into executable using main.spec
 - Git — Version tracking
 
 # Setup/Installation
 Download the latest .exe from the releases page (link below), place it anywhere on your computer, and double-click to launch.
 
 # Security Guarantee
-The file is 100% safe to run. It doesnt contain any malicious software. This executable is self-contained and does not connect to the internet or collect any data.
+The file is 100% safe to run. It doesnt contain any malicious software. This executable is self-contained and does not connect to the internet or collect any data. The executable is verified by virustotal.com and only False Positives are there with a score of 2/60. You can also check the exe for yourself on virustotal.com for clarity and self assurance.
 
 # Download
 Get the latest release from this repository's releases: (Applecore Download)[https://github.com/HBCC1999/applecore/releases/]
 
 # QNA
-Have any questions or issues with running the game, head to the discussions tab to ask questions or give suggestions for the future of the game.
+Have any questions or issues with running the game, head to the discussions tab to ask questions or give suggestions for the future of the game. You can also head to our channel on [YouTube](https://www.youtube.com/@HBCC1999) We also upload about upcoming stuff (sneak-peaks) and relevant mechanics of the game there! 
 
 # License
 © 2024–2026 HBCC1999. All rights reserved.
 Source code is made public for review and transparency purposes only.
-Redistribution, repackaging, or reverse engineering is not permitted.
+Redistribution, repackaging, or reverse engineering is discouraged.
 For the assets(images, audio etc.), checkout the ASSET_LICENSE File for more details.
+Modding is permitted provided that the source-repository is referenced and the game isn't redistributed.
 
 # Credits
 Developed by HBCC1999. Some of the game textures are made by the developer, while some are AI-generated. However the code is written completely by the developer. Audio by Youtube Studio.
