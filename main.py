@@ -235,7 +235,7 @@ def fading_text(text, color, x, y, bold=False, italic=False, size=16, period=2.0
 
 _alpha_states = {}
 def fading_background_filter(surface: pygame.Surface, x=0, y=0, start_alpha=100,
-                             target_alpha=0, fade_speed=2, reset=False, cycle=False):
+                             target_alpha=0, fade_speed=2, cycle=False):
     """Frame-based fading background, reset=True means you can redisplay the effect on the same surface on repeted calls.
     If you want an oscilating-fade, then turn cycle to True, and fade_speed to the value of period of this oscillation."""
     fade_in = start_alpha > target_alpha
@@ -251,7 +251,7 @@ def fading_background_filter(surface: pygame.Surface, x=0, y=0, start_alpha=100,
 
     # if reset:
     #     current_alpha = start_alpha
-    #     _alpha_states[surface] = current_alpha
+    #     _alpha_states[surface] = current_alpha # we'll be back when this matters
     
     if not cycle:
         if current_alpha is None:
@@ -421,10 +421,10 @@ def pause_window():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game = True
-                sys.exit()
                 if not mute_music:
                     pygame.mixer.music.load(resource_path("assets/main_game_music.mp3"))
                     pygame.mixer.music.play(-1)
+                sys.exit()
                 return quit_game
             
             if event.type == pygame.KEYDOWN:
@@ -803,13 +803,13 @@ def gameloop():
                     time_taken_to_score = round(time.time() - time1 - time_paused, 2) if time1 is not None else 0
                     appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
                     # Checking if the current appocity is greater than the highest appocity and updating it if necessary
-                    if appocity is not None and (appocity) > float(h_appocity):
+                    if appocity is not None and (appocity) > float(h_appocity) and not testing_mode and not debug_activated:
                         h_appocity = str(appocity)
                         in_game_info[1] = str(appocity)
                     # print(time_taken_to_score, appocity, h_appocity)
                     
                     # Checking if the current score is greater than the highscore and updating it if necessary
-                    if score > int(h_score):
+                    if score > int(h_score)  and not testing_mode and not debug_activated:
                         h_score = str(score)
                         in_game_info[0] = str(score)
                     
