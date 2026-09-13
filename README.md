@@ -83,10 +83,17 @@ Have any questions or issues with running the game, head to the discussions tab 
 
 # License
 © 2024–2026 HBCC1999. All rights reserved.
-Source code is made public for review and transparency purposes only.
-Redistribution, repackaging, or reverse engineering is discouraged.
-For the assets(images, audio etc.), checkout the ASSET_LICENSE File for more details.
-Modding is permitted provided that the source-repository is referenced and the game isn't redistributed.
+Source code is public for review, transparency, and educational reference only — copying, redistributing, repackaging, rebranding, or reverse engineering it is **not permitted**, except to the minimal extent needed to build a Mod (see below).
+The official compiled executable (from the Releases page) is free to download and use for personal, non-commercial use.
+
+**Modding is welcome.** You can create and distribute Mods (add-ons, plugins, patches, scripts, save files, asset packs, config changes, etc.) as long as they:
+- require the official, unmodified executable to run (i.e. aren't a standalone version of the game),
+- don't include or embed the original source code, and
+- aren't a full/near-complete reimplementation of the game.
+
+Anyone distributing a Mod must credit the original game and link back to this repo, clearly state the Mod is unofficial and not endorsed by me, and not misrepresent it as the official game or as containing official source.
+
+Full terms: see [LICENSE.md](LICENSE.md). Asset-specific terms: see [ASSET_LICENSE.md](ASSET_LICENSE.md).
 
 # Credits
 Developed by HBCC1999. Some of the game textures are made by the developer, while some are AI-generated. However the code is written completely by the developer. Audio by Youtube Studio.
