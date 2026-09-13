@@ -1,4 +1,4 @@
-"""Applecore (Standard) v3.8-beta.1-dev
+"""Applecore (Standard) v3.8-beta.1
 Copyright (c) 2024-2026 HBCC1999. All rights reserved.
 Licensed under the terms in LICENSE and ASSET_LICENSE. Unauthorized redistribution prohibited.
 Developed by HBCC1999
@@ -241,7 +241,7 @@ except (FileNotFoundError, json.JSONDecodeError, ValueError):
 
     if migrated_data is not None:
         in_game_data.update(migrated_data)
-        print(f"Debug: Migrated save data from a previous version, {previous_core_data[1]}")
+        print(f"Debug: Migrated save data from a previous version: {previous_core_data[1]}")
 
     else:
         migrated_data = find_legacy_highscores()
