@@ -42,7 +42,7 @@ def save_data_path(file_name):
     folder.mkdir(parents=True, exist_ok=True)
     return str(folder / file_name)
 
-def save_data(data, file_name="highscores.txt", mode="w"):
+def save_data(data, file_name, mode="w"):
     """Save the data to game files in Appdata/GameData, only to be used for game-data files, not assets"""
     try:
         with open(save_data_path(file_name), mode = mode) as f:
@@ -52,7 +52,7 @@ def save_data(data, file_name="highscores.txt", mode="w"):
         with open(save_data_path(file_name), mode=mode) as f:
             f.write(data)
 
-def read_data(file_name="highscores.txt"):
+def read_data(file_name):
     """Read the data from game files in Appdata/GameData, only to be used for game-data files, not assets"""
     with open(save_data_path(file_name), "r") as f:
         data = f.read()
@@ -69,6 +69,83 @@ def read_json_data(file_name):
     """Read and parse a JSON game-data file. Raises FileNotFoundError / json.JSONDecodeError on failure :("""
     with open(save_data_path(file_name), "r", encoding="utf-8") as f:
         return json.load(f)
+
+CORE_DATA_BLUEPRINT = {
+    "highscore": int,
+    "highest_appocity": (int, float),
+    "dynamic_fps": bool,
+    "debug_mode": bool,
+} # Blueprint for the perfect, intended, legitimate core data structure.
+
+def validate_core_data(data):
+    """Check the legitimacy of the provided dict by comparing it with CORE_DATA_BLUEPRINT"""
+    if not isinstance(data, dict):
+        return False
+
+    for key, intended_type in CORE_DATA_BLUEPRINT.items():
+        if key not in data or not isinstance(data[key], intended_type):
+            return False # corrupted data
+
+    return True
+
+def find_previous_core_data() -> None|tuple:
+    """Find the previous core data by checking last modified date."""
+    appdata = os.getenv("LOCALAPPDATA")
+    game_data_root = Path(appdata) / "Applecore" / "GameData"
+
+    if not game_data_root.exists():
+        return None
+
+    current_folder_name = f"_{version}"
+    candidates = []
+
+    for entry in os.scandir(game_data_root):
+        if not entry.is_dir() or entry.name == current_folder_name:
+            continue
+
+        candidate_file = Path(entry.path) / "core_data.json"
+        if not candidate_file.exists():
+            continue
+
+        try:
+            with open(candidate_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            continue
+
+        if not validate_core_data(data):
+            continue
+
+        candidates.append((candidate_file.stat().st_mtime, data, candidate_file))
+
+    if not candidates:
+        return None
+
+    candidates.sort(key=lambda pair: pair[0], reverse=True)
+    return candidates[0][1], candidates[0][2]
+
+def find_legacy_highscores() -> None|dict:
+    """Parse the data from legacy highscores.txt if needed."""
+    legacy_game_data_path = save_data_path("highscores.txt")
+    if not os.path.exists(legacy_game_data_path):
+        return None
+
+    try:
+        with open(legacy_game_data_path, "r") as f:
+            lines = f.read().split("\n")
+    except OSError:
+        return None
+
+    recovered_data = {}
+
+    if len(lines) > 0 and lines[0].isdigit():
+        recovered_data["highscore"] = int(lines[0])
+    if len(lines) > 1 and lines[1].replace(".", "", 1).isdigit():
+        recovered_data["highest_appocity"] = float(lines[1])
+    if len(lines) > 2 and lines[2] in ("True", "False"):
+        recovered_data["dynamic_fps"] = (lines[2] == "True")
+
+    return recovered_data if recovered_data else None
 
 GAME_VERSION = __doc__.split("\n")[0]
 version = GAME_VERSION[GAME_VERSION.index("v"):]
@@ -152,18 +229,28 @@ else:
 
 print("Hello "+username)
 
+# Validation logic + Migration of data from nearest version.
 try:
     in_game_data = read_json_data(CORE_DATA_FILENAME)
-    if not (
-        isinstance(in_game_data, dict)
-        and isinstance(in_game_data.get("highscore"), int)
-        and isinstance(in_game_data.get("highest_appocity"), (int, float))
-        and isinstance(in_game_data.get("dynamic_fps"), bool)
-        and isinstance(in_game_data.get("debug_mode"), bool)
-    ):
+    if not validate_core_data(in_game_data):
         raise ValueError("core_data.json has an unexpected shape") # corrupted file
 except (FileNotFoundError, json.JSONDecodeError, ValueError):
     in_game_data = DEFAULT_CORE_DATA.copy()
+    previous_core_data = find_previous_core_data()
+    migrated_data = previous_core_data[0] if previous_core_data is not None else None
+
+    if migrated_data is not None:
+        in_game_data.update(migrated_data)
+        print(f"Debug: Migrated save data from a previous version, {previous_core_data[1]}")
+
+    else:
+        migrated_data = find_legacy_highscores()
+        if migrated_data is not None:
+            in_game_data.update(migrated_data)
+            print("Debug: Recovered save data from legacy highscores.txt.")
+        else:
+            print("Debug: No previous save data found, starting fresh.")
+
     save_json_data(in_game_data, CORE_DATA_FILENAME)
 
 # This is a variable that determines whether the game should adjust its FPS based on the optimization index or not,
@@ -401,12 +488,12 @@ def save_game_stats(score:int, time_taken_to_score, h_score,
     
     # Checking if the current appocity is greater than the highest appocity and updating it if necessary
     if appocity is not None and (appocity) > float(h_appocity) and not testing_mode and not debug_activated:
-        h_appocity = str(appocity)
+        h_appocity = (appocity)
         in_game_data["highest_appocity"] = (appocity) if appocity is not None else 0.0
     
     # Checking if the current score is greater than the highscore and updating it if necessary
     if score > int(h_score) and not testing_mode and not debug_activated:
-        h_score = str(score)
+        h_score = (score)
         in_game_data["highscore"] = score
     
     in_game_data["dynamic_fps"] = (Dynamic_FPS)
