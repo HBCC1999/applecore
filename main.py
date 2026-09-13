@@ -18,6 +18,7 @@ import datetime
 import psutil as p
 from pathlib import Path
 import math
+import json
 
 pygame.init()
 
@@ -43,8 +44,13 @@ def save_data_path(file_name):
 
 def save_data(data, file_name="highscores.txt", mode="w"):
     """Save the data to game files in Appdata/GameData, only to be used for game-data files, not assets"""
-    with open(save_data_path(file_name), mode = mode) as f:
-        f.write(data)
+    try:
+        with open(save_data_path(file_name), mode = mode) as f:
+            f.write(data)
+    except FileNotFoundError:
+        os.makedirs(os.path.dirname(save_data_path(file_name)), exist_ok=True)
+        with open(save_data_path(file_name), mode=mode) as f:
+            f.write(data)
 
 def read_data(file_name="highscores.txt"):
     """Read the data from game files in Appdata/GameData, only to be used for game-data files, not assets"""
@@ -52,10 +58,30 @@ def read_data(file_name="highscores.txt"):
         data = f.read()
     return data
 
+def save_json_data(data:dict, file_name):
+    """Save game data as JSON to a game-data file in AppData/GameData."""
+    path = save_data_path(file_name)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+def read_json_data(file_name):
+    """Read and parse a JSON game-data file. Raises FileNotFoundError / json.JSONDecodeError on failure :("""
+    with open(save_data_path(file_name), "r", encoding="utf-8") as f:
+        return json.load(f)
+
 GAME_VERSION = __doc__.split("\n")[0]
+version = GAME_VERSION[GAME_VERSION.index("v"):]
 print(__doc__, end="")
 
-version = GAME_VERSION[GAME_VERSION.index("v"):]
+CORE_DATA_FILENAME = f"_{version}/core_data.json"
+DEFAULT_CORE_DATA = {
+    "highscore" : 0,
+    "highest_appocity" : 0,
+    "dynamic_fps" : False,
+    "debug_mode" : False
+}
+
 snake = 30
 testing_mode = False
 debug_activated = False
@@ -125,36 +151,26 @@ else:
     save_data(username, file_name="user_info.txt")
 
 print("Hello "+username)
-# username = open(resource_path("user_info.txt")).read()[2:8]
-
-# Better in-game-info management, now the game will check if the in-game-info
-# file is corrupted or not, and if it is corrupted then it will reset the file to default values
-gamefilecontent = ""
-if os.path.exists(save_data_path('highscores.txt')):
-    gamefilecontent = read_data("highscores.txt")
-in_game_info = gamefilecontent.split("\n")
-debug_mode = ((not len(in_game_info)<4) and in_game_info[3] == "True")
-print(f"Debug: Debug mode set to {debug_mode}")
-
-first_line_of_file = gamefilecontent.split("\n")[0] if gamefilecontent else ""
 
 try:
-    should_reset_gamefilecontent = (
-        not first_line_of_file.isdigit() or
-        not in_game_info[1].replace('.', '', 1).isdigit() or
-        in_game_info[2] not in ('True', 'False')
-    )
-
-except IndexError:
-    should_reset_gamefilecontent = True # The file is corrupted or empty
-
-if should_reset_gamefilecontent:
-    save_data("0\n0\nFalse")
-    in_game_info = ["0", "0", "False"]
+    in_game_data = read_json_data(CORE_DATA_FILENAME)
+    if not (
+        isinstance(in_game_data, dict)
+        and isinstance(in_game_data.get("highscore"), int)
+        and isinstance(in_game_data.get("highest_appocity"), (int, float))
+        and isinstance(in_game_data.get("dynamic_fps"), bool)
+        and isinstance(in_game_data.get("debug_mode"), bool)
+    ):
+        raise ValueError("core_data.json has an unexpected shape") # corrupted file
+except (FileNotFoundError, json.JSONDecodeError, ValueError):
+    in_game_data = DEFAULT_CORE_DATA.copy()
+    save_json_data(in_game_data, CORE_DATA_FILENAME)
 
 # This is a variable that determines whether the game should adjust its FPS based on the optimization index or not,
 # if set to False the game will run at a constant FPS regardless of the optimization index
-Dynamic_FPS = (in_game_info[2] == "True")
+Dynamic_FPS = in_game_data["dynamic_fps"]
+debug_mode = in_game_data["debug_mode"]
+print(f"Debug: Debug mode set to {debug_mode}")
 
 text_input = ""
 
@@ -378,25 +394,24 @@ def leftover_pixels(text: str, bold: bool=False, italic: bool=False, size: int=1
     return screen_size - leftover - size_to_use
 
 
-def save_game_stats(score, time_taken_to_score, h_score,
-                    h_appocity, in_game_info, Dynamic_FPS, testing_mode, debug_activated):
+def save_game_stats(score:int, time_taken_to_score, h_score,
+                    h_appocity, Dynamic_FPS:bool, testing_mode, debug_activated):
     """Saves the score, appocity and checks its legitimacy."""
     appocity = (round(score/time_taken_to_score,2)) if time_taken_to_score != 0 else None
     
     # Checking if the current appocity is greater than the highest appocity and updating it if necessary
     if appocity is not None and (appocity) > float(h_appocity) and not testing_mode and not debug_activated:
         h_appocity = str(appocity)
-        in_game_info[1] = str(appocity)
+        in_game_data["highest_appocity"] = (appocity) if appocity is not None else 0.0
     
     # Checking if the current score is greater than the highscore and updating it if necessary
     if score > int(h_score) and not testing_mode and not debug_activated:
         h_score = str(score)
-        in_game_info[0] = str(score)
+        in_game_data["highscore"] = score
     
-    if in_game_info[2] != str(Dynamic_FPS):
-        in_game_info[2] = str(Dynamic_FPS)
+    in_game_data["dynamic_fps"] = (Dynamic_FPS)
 
-    save_data("\n".join(in_game_info))
+    save_json_data(in_game_data, CORE_DATA_FILENAME)
 
     return h_score, h_appocity, appocity
 
@@ -600,7 +615,6 @@ def gameloop():
     global mute_music
     global optimization_index
     global target_fps
-    global in_game_info
     global Dynamic_FPS
     global time_taken_to_score
     global testing_mode
@@ -628,8 +642,8 @@ def gameloop():
     trailing_buffer = 5
     fps = DEFAULT_FPS
 
-    h_score = in_game_info[0]
-    h_appocity = in_game_info[1]
+    h_score = in_game_data["highscore"]
+    h_appocity = in_game_data["highest_appocity"]
 
     appocity = 0.0
     quit_game = False
@@ -683,7 +697,7 @@ def gameloop():
                 death_frame = False
                 h_score, h_appocity, appocity = save_game_stats(
                     score, time_taken_to_score, h_score,
-                    h_appocity, in_game_info, Dynamic_FPS, testing_mode, debug_activated
+                    h_appocity, Dynamic_FPS, testing_mode, debug_activated
                 )
                 show_green_apple = random.choice([False, False, False, False, True])
 
@@ -810,7 +824,7 @@ def gameloop():
                     time_taken_to_score = round(time.time() - time1 - time_paused, 2) if time1 is not None else 0
                     h_score, h_appocity, appocity = save_game_stats(
                         score, time_taken_to_score, h_score,
-                        h_appocity, in_game_info, Dynamic_FPS, testing_mode, debug_activated
+                        h_appocity, Dynamic_FPS, testing_mode, debug_activated
                     )
 
                     print("Debug: Save data before closing.")
@@ -1167,7 +1181,7 @@ def gameloop():
                     time_taken_to_score = round(time.time() - time1 - time_paused, 2) if time1 is not None else 0
                     h_score, h_appocity, appocity = save_game_stats(
                         score, time_taken_to_score, h_score, h_appocity,
-                        in_game_info, Dynamic_FPS, testing_mode, debug_activated
+                        Dynamic_FPS, testing_mode, debug_activated
                     )
                     quit_game = True
                     print("Debug: Force closing the game.")
