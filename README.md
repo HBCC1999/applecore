@@ -1,5 +1,6 @@
 # Applecore 🍎
-Applecore is an over-engineered, voxel-style game, where you devour apples for survival with a speedrunning theme, featuring elements like appocity (score per second) and giving you the control of the snake's attributes like speed, growth factor etc, using keybinds. Dive deep into the dynamic adventure and constant challenging gameplay. Let the hype of the snake game comeback with a new spirit!
+Applecore is an over-engineered, voxel-style game, where you devour apples for survival with a speedrunning theme, featuring elements like appocity (score per second) and giving you the control of the snake's attributes like speed, growth factor etc, using keybinds.\
+***_Dive deep into the dynamic adventure and constant challenging gameplay. Let the hype of the snake game comeback with a new spirit!_***
 
 # Controls
 
@@ -74,7 +75,8 @@ Download the latest .exe from the releases page (link below), place it anywhere 
 The file is 100% safe to run. It doesnt contain any malicious software. This executable is self-contained and does not connect to the internet or collect any data. The executable is verified by virustotal.com and only False Positives are there with a score of 2/60. You can also check the exe for yourself on virustotal.com for clarity and self assurance.
 
 # Download
-Get the latest release from this repository's releases: (Applecore Download)[https://github.com/HBCC1999/applecore/releases/]
+Get the latest release from this repository's releases: [Applecore Standard Edition Download](https://github.com/HBCC1999/applecore/releases/)\
+Backport Edition (smaller file size, win 7 & 8 compatible): [Backport Edition Download](https://github.com/HBCC1999/applecore-backport/releases)
 
 # QNA
 Have any questions or issues with running the game, head to the discussions tab to ask questions or give suggestions for the future of the game. You can also head to our channel on [YouTube](https://www.youtube.com/@HBCC1999) We also upload about upcoming stuff (sneak-peaks) and relevant mechanics of the game there! 
