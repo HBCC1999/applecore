@@ -75,6 +75,7 @@ CORE_DATA_BLUEPRINT = {
     "highest_appocity": (int, float),
     "dynamic_fps": bool,
     "debug_mode": bool,
+    "default_fps": int
 } # Blueprint for the perfect, intended, legitimate core data structure.
 
 def validate_core_data(data):
@@ -152,21 +153,22 @@ version = GAME_VERSION[GAME_VERSION.index("v"):]
 print(__doc__, end="")
 
 CORE_DATA_FILENAME = f"_{version}/core_data.json"
+game_window = pygame.display.set_mode((900, 600))
+display_refresh_rate = pygame.display.get_current_refresh_rate()
 DEFAULT_CORE_DATA = {
     "highscore" : 0,
     "highest_appocity" : 0,
     "dynamic_fps" : False,
-    "debug_mode" : False
+    "debug_mode" : False,
+    "default_fps": max(60, display_refresh_rate)
 }
 
 snake = 30
 testing_mode = False
 debug_activated = False
-DEFAULT_FPS = 60
 scr = []
 today_date = datetime.date.today()
 # is_independence_month = (today_date.month == 8 and today_date.day == 14)
-game_window = pygame.display.set_mode((900, 600))
 is_independence_month = (today_date.month == 8) # Applies for the whole month of August.
 if is_independence_month:
     # august_background = pygame.image.load(resource_path("assets/august_background.jpg"))
@@ -176,7 +178,6 @@ if is_independence_month:
 else:
     green_apple = None
 mute_music = False
-target_fps = DEFAULT_FPS
 optimization_constant = 2.8 #This is a constant that is based of to calculate optimization index in gameloop its value is based of 70/25, where 25 is optimization index
 # that implies that the system is optimized enough to run the game at 70% of display refresh rate and this is the highest in the middle tier fps
 
@@ -199,7 +200,6 @@ red_apple = pygame.transform.scale(red_apple, (snake, snake)).convert_alpha()
 # si = pygame.transform.scale(s_i, (43, 43)).convert_alpha()
 setting_page = pygame.image.load(resource_path('assets/settings_page_image.png'))
 setting_page = pygame.transform.scale(setting_page, (900, 600)).convert_alpha()
-display_refresh_rate = pygame.display.get_current_refresh_rate()
 p.cpu_percent(interval=None); time.sleep(0.3)
 cpu_unused = 100 - p.cpu_percent(interval=None)
 battery_unused = 100 if p.sensors_battery() is None else p.sensors_battery().percent
@@ -258,6 +258,8 @@ except (FileNotFoundError, json.JSONDecodeError, ValueError):
 Dynamic_FPS = in_game_data["dynamic_fps"]
 debug_mode = in_game_data["debug_mode"]
 print(f"Debug: Debug mode set to {debug_mode}")
+DEFAULT_FPS = in_game_data["default_fps"]
+target_fps = DEFAULT_FPS
 
 text_input = ""
 
@@ -955,7 +957,7 @@ def gameloop():
                         Dynamic_FPS_time_start = time.time()
                         Dynamic_FPS = not Dynamic_FPS
                         if not Dynamic_FPS:
-                            target_fps = DEFAULT_FPS if display_refresh_rate >= DEFAULT_FPS else display_refresh_rate
+                            target_fps = DEFAULT_FPS
                     if (event.key == pygame.K_RIGHT or event.key == pygame.K_d) and velocity_x == 0 and init_velocity != 0:
                         velocity_x = init_velocity
                         velocity_y = 0
