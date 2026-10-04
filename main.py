@@ -1,4 +1,4 @@
-"""Applecore (Standard) v3.8-beta.1
+"""Applecore (Standard) v3.8.dev
 Copyright (c) 2024-2026 HBCC1999. All rights reserved.
 Licensed under the terms in LICENSE and ASSET_LICENSE. Unauthorized redistribution prohibited.
 Developed by HBCC1999
@@ -722,6 +722,7 @@ def gameloop():
     Dynamic_FPS_time_start = 0
     debug_activated = False
     debug_score = False
+    head = []
 
     snake = 30
     apple_collrate = 12
@@ -763,6 +764,8 @@ def gameloop():
     time_paused = 0
     show_green_apple = random.choice([False, False, False, False, True])
     time_before_game_loop = time.time()
+
+    previous_x, previous_y = snake_x, snake_y
 
     dt_test = False
     if dt_test:
@@ -1034,6 +1037,15 @@ def gameloop():
                 time1 = time.time()
                 time_paused = 0
 
+            # direction_changed can also be synced with velocity_x and velocity_y but this approach works just fine
+            if direction_changed:
+                # Prevents redrawing a box on almost same positions to avoid self collision in extreme-case velocity scenarios.
+                if not s_lst or abs(s_lst[-1][0]-snake_x) >= 1 or abs(s_lst[-1][1]-snake_y) >= 1:
+                    s_lst.append([int(snake_x), int(snake_y)])
+                distance_since_last_segment = 0
+                direction_changed = False
+
+            # snake motion calculated after head is identified in current frame.
             velocity_x_f = (velocity_x * dt)
             velocity_y_f = (velocity_y * dt)
 
@@ -1078,14 +1090,6 @@ def gameloop():
             # New Snake rendering system(v3.7+)
             step_dist = abs(velocity_x_f) + abs(velocity_y_f)
             distance_since_last_segment += step_dist
-
-            # direction_changed can also be synced with velocity_x and velocity_y but this approach works just fine
-            if direction_changed:
-                # Prevents redrawing a box on almost same positions to avoid self collision in extreme-case velocity scenarios.
-                if not s_lst or abs(s_lst[-1][0]-snake_x) >= 1 or abs(s_lst[-1][1]-snake_y) >= 1:
-                    s_lst.append([int(snake_x), int(snake_y)])
-                distance_since_last_segment = 0
-                direction_changed = False
 
             while distance_since_last_segment >= segment_spacing:
                 head = []
@@ -1231,6 +1235,17 @@ def gameloop():
             else:
                 if time.time()-testing_mode_time_start < 0.5:
                     load_text("Debug: Test Mode Disabled", red, 10, 575, bold = False)
+
+            # # Mechanism to prevent visual distortions of snakes body.
+            # y,x = head if head else (None, None)
+
+            # if head and direction_changed and velocity_x != 0 and y != previous_y:
+            #     head[1] = previous_y
+            #     print("done done")
+            # elif head and direction_changed and velocity_y != 0 and x != previous_x:
+            #     head[0] = previous_x
+            #     print("done done")
+
 
             # Difficulty Mode State Indication
             difficulty = (
